@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+
+@theme {
+	--font-serif: 'Cinzel', Georgia, serif;
+	--font-body: 'Lora', Georgia, serif;
+
+	--color-bg-main: var(--color-bg-main);
+	--color-bg-card: var(--color-bg-card);
+	--color-border-main: var(--color-border-main);
+	--color-border-accent: var(--color-border-accent);
+
+	--color-text-main: var(--color-text-main);
+	--color-text-body: var(--color-text-body);
+	--color-text-muted: var(--color-text-muted);
+	--color-text-footer: var(--color-text-footer);
+}
+
+:root {
+	/* Background colors */
+	--color-bg-main: #0b1a28; /* Dark forest green page background */
+	--color-bg-card: #14281d; /* Slightly lighter forest green for cards */
+
+	/* Border & Divider colors */
+	--color-border-main: #1f3f2f; /* Subtle divider & card border */
+	--color-border-accent: #2d5a43; /* Accent border (e.g. profile avatar ring) */
+
+	/* Typography & Text colors */
+	--color-text-main: #eff0e0; /* Primary off-white heading text */
+	--color-text-body: #d4dbd2; /* Readable off-white body text */
+	--color-text-muted: #7d9183; /* Muted secondary text (e.g. copyright) */
+	--color-text-footer: #c5d0c1; /* Footer navigation links */
+}
+
+body {
+	font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, .font-serif {
+	font-family: var(--font-serif);
+	letter-spacing: 0.05em;
+}
