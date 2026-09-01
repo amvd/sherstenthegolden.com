@@ -4,7 +4,9 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
+		"generate:meta": "node scripts/generate-meta-assets.js",
+		"prebuild": "npm run generate:meta",
+		"dev": "npm run generate:meta && vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
