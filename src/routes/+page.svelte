@@ -6,10 +6,7 @@
 	import home4 from '$lib/assets/images/home/home-4.jpg?w=640;1024;1600&format=avif;webp;jpg&as=picture';
 
 	const socials = [
-		{ name: 'Instagram', url: 'https://instagram.com' },
-		{ name: 'TikTok', url: 'https://tiktok.com' },
-		{ name: 'YouTube', url: 'https://youtube.com' },
-		{ name: 'Patreon', url: 'https://patreon.com' },
+		{ name: 'Instagram', url: 'https://instagram.com/shersten.the.golden' },
 		{ name: 'Email', url: 'mailto:contact@sherstenthegolden.com' }
 	];
 
@@ -100,21 +97,25 @@
 		</div>
 
 		<!-- Divider -->
-		<div class="w-full max-w-4xl px-6 flex justify-center">
+		<div class="flex w-full max-w-4xl justify-center px-6">
 			<hr class="my-12 w-full max-w-xl border-border-main" />
 		</div>
 
 		<!-- Alternating Showcases with Seamless Full Edge-to-Edge Fading & Parallax -->
-		<section class="w-full flex flex-col gap-20 md:gap-36 overflow-hidden">
+		<section class="flex w-full flex-col gap-20 overflow-hidden md:gap-36">
 			{#each showcases as item, i}
 				{@const isEven = i % 2 === 0}
 				<!-- Expected scroll position for this section to calculate relative parallax offset -->
 				{@const baseOffset = 600 + i * 800}
 				{@const parallaxY = (scrollY - baseOffset) * 0.08}
 
-				<div class="relative w-full flex flex-col md:flex-row items-center {isEven ? 'md:flex-row' : 'md:flex-row-reverse'}">
+				<div
+					class="relative flex w-full flex-col items-center md:flex-row {isEven
+						? 'md:flex-row'
+						: 'md:flex-row-reverse'}"
+				>
 					<!-- Full-Height Image Container with Smooth Multi-Stop Gradient Fades -->
-					<div class="relative w-full md:w-3/5 overflow-hidden">
+					<div class="relative w-full overflow-hidden md:w-3/5">
 						<picture class="block w-full">
 							{#each Object.entries(item.picture.sources) as [format, srcset]}
 								<source {srcset} type={'image/' + format} />
@@ -124,7 +125,7 @@
 								width={item.picture.img.w}
 								height={item.picture.img.h}
 								alt={item.alt}
-								class="w-full h-auto object-contain will-change-transform scale-105"
+								class="h-auto w-full scale-105 object-contain will-change-transform"
 								style:transform="translateY({parallaxY}px)"
 								loading="lazy"
 								decoding="async"
@@ -133,50 +134,62 @@
 
 						<!-- Mobile: Smooth Vignette Gradient (Top, Bottom & Sides) -->
 						<div
-							class="absolute inset-0 md:hidden pointer-events-none bg-[radial-gradient(ellipse_at_center,_transparent_40%,_var(--color-bg-main)_95%)]"
+							class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_var(--color-bg-main)_95%)] md:hidden"
 						></div>
 						<div
-							class="absolute inset-0 md:hidden pointer-events-none bg-gradient-to-t from-bg-main via-transparent to-bg-main"
+							class="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg-main via-transparent to-bg-main md:hidden"
 						></div>
 
 						<!-- Desktop: Deep Directional Gradient Mask from image edge into page background -->
 						{#if isEven}
 							<div
-								class="hidden md:block absolute inset-0 pointer-events-none bg-gradient-to-r from-transparent via-bg-main/30 to-bg-main"
+								class="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-transparent via-bg-main/30 to-bg-main md:block"
 							></div>
 							<!-- Left edge gentle blend -->
 							<div
-								class="hidden md:block absolute inset-y-0 left-0 w-24 pointer-events-none bg-gradient-to-r from-bg-main to-transparent"
+								class="pointer-events-none absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-bg-main to-transparent md:block"
 							></div>
 						{:else}
 							<div
-								class="hidden md:block absolute inset-0 pointer-events-none bg-gradient-to-l from-transparent via-bg-main/30 to-bg-main"
+								class="pointer-events-none absolute inset-0 hidden bg-gradient-to-l from-transparent via-bg-main/30 to-bg-main md:block"
 							></div>
 							<!-- Right edge gentle blend -->
 							<div
-								class="hidden md:block absolute inset-y-0 right-0 w-24 pointer-events-none bg-gradient-to-l from-bg-main to-transparent"
+								class="pointer-events-none absolute inset-y-0 right-0 hidden w-24 bg-gradient-to-l from-bg-main to-transparent md:block"
 							></div>
 						{/if}
 
 						<!-- Deep Top & Bottom Smooth Gradient Blends -->
-						<div class="absolute inset-x-0 top-0 h-32 md:h-44 pointer-events-none bg-gradient-to-b from-bg-main via-bg-main/60 to-transparent"></div>
-						<div class="absolute inset-x-0 bottom-0 h-32 md:h-44 pointer-events-none bg-gradient-to-t from-bg-main via-bg-main/60 to-transparent"></div>
+						<div
+							class="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-bg-main via-bg-main/60 to-transparent md:h-44"
+						></div>
+						<div
+							class="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-bg-main via-bg-main/60 to-transparent md:h-44"
+						></div>
 					</div>
 
 					<!-- Opposing Text Content Area -->
-					<div class="relative z-10 w-full md:w-2/5 px-6 py-8 md:py-12 flex {isEven ? 'md:justify-start' : 'md:justify-end'}">
+					<div
+						class="relative z-10 flex w-full px-6 py-8 md:w-2/5 md:py-12 {isEven
+							? 'md:justify-start'
+							: 'md:justify-end'}"
+					>
 						<div
-							class="w-full max-w-md bg-bg-main/85 md:bg-transparent backdrop-blur-md md:backdrop-blur-none p-6 md:p-0 rounded-2xl md:rounded-none border md:border-none border-border-main/60 shadow-lg md:shadow-none space-y-3 {isEven ? 'text-left' : 'text-left md:text-right'}"
+							class="w-full max-w-md space-y-3 rounded-2xl border border-border-main/60 bg-bg-main/85 p-6 shadow-lg backdrop-blur-md md:rounded-none md:border-none md:bg-transparent md:p-0 md:shadow-none md:backdrop-blur-none {isEven
+								? 'text-left'
+								: 'text-left md:text-right'}"
 						>
 							<span
-								class="inline-block text-xs uppercase tracking-widest text-text-muted font-serif"
+								class="inline-block font-serif text-xs tracking-widest text-text-muted uppercase"
 							>
 								{item.subtitle}
 							</span>
-							<h2 class="text-2xl sm:text-3xl md:text-4xl font-bold font-serif tracking-wide text-text-main">
+							<h2
+								class="font-serif text-2xl font-bold tracking-wide text-text-main sm:text-3xl md:text-4xl"
+							>
 								{item.title}
 							</h2>
-							<p class="text-sm sm:text-base text-text-body leading-relaxed">
+							<p class="text-sm leading-relaxed text-text-body sm:text-base">
 								{item.description}
 							</p>
 						</div>
