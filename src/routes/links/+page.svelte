@@ -1,7 +1,26 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import QRCode from 'qrcode';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import avatarImg from '$lib/assets/profile/main.jpg?w=160;320&format=avif;webp;jpg&as=picture';
+
+	let qrSvg = $state('');
+
+	onMount(async () => {
+		try {
+			qrSvg = await QRCode.toString('https://sherstenthegolden.com/links', {
+				type: 'svg',
+				margin: 1,
+				color: {
+					dark: '#0b1a28',
+					light: '#eff0e0'
+				}
+			});
+		} catch (err) {
+			console.error('Failed to generate QR code', err);
+		}
+	});
 
 	const links = [
 		{
@@ -126,6 +145,46 @@
 						{/if}
 					</a>
 				{/each}
+			</div>
+
+			<!-- Desktop Only: View on Mobile QR Code Section -->
+			<div
+				class="mt-10 hidden flex-col items-center justify-center rounded-2xl border border-border-main/60 bg-bg-card/30 p-6 text-center shadow-lg md:flex"
+			>
+				<div class="flex items-center gap-2 text-text-highlight">
+					<svg
+						class="h-5 w-5"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+						aria-hidden="true"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+						/>
+					</svg>
+					<span class="font-serif text-sm font-semibold tracking-wider uppercase">
+						View on Mobile
+					</span>
+				</div>
+				<p class="mt-1.5 max-w-xs text-xs text-text-muted">
+					Scan with your phone's camera to open these links directly on mobile.
+				</p>
+				<div
+					class="mt-4 flex h-36 w-36 items-center justify-center rounded-xl bg-text-main p-2 shadow-inner"
+				>
+					{#if qrSvg}
+						<div class="h-full w-full [&>svg]:h-full [&>svg]:w-full" aria-hidden="true">
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+							{@html qrSvg}
+						</div>
+					{:else}
+						<div class="h-full w-full animate-pulse rounded bg-black/10"></div>
+					{/if}
+				</div>
 			</div>
 		</main>
 	</div>
