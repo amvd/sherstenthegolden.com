@@ -3,6 +3,7 @@
 @theme {
 	--font-serif: 'Cinzel', Georgia, serif;
 	--font-body: 'Lora', Georgia, serif;
+	--font-fondamento: 'Fondamento', cursive, serif;
 
 	--color-bg-main: var(--color-bg-main);
 	--color-bg-card: var(--color-bg-card);
