@@ -5,16 +5,16 @@
 	--font-body: 'Lora', Georgia, serif;
 	--font-fondamento: 'Fondamento', cursive, serif;
 
-	--color-bg-main: var(--color-bg-main);
-	--color-bg-card: var(--color-bg-card);
-	--color-border-main: var(--color-border-main);
-	--color-border-accent: var(--color-border-accent);
+	--color-bg-main: var(--color-bg-main, #0b1a28);
+	--color-bg-card: var(--color-bg-card, #14281d);
+	--color-border-main: var(--color-border-main, #1f3f2f);
+	--color-border-accent: var(--color-border-accent, #2d5a43);
 
-	--color-text-main: var(--color-text-main);
-	--color-text-body: var(--color-text-body);
-	--color-text-highlight: var(--color-text-highlight);
-	--color-text-muted: var(--color-text-muted);
-	--color-text-footer: var(--color-text-footer);
+	--color-text-main: var(--color-text-main, #eff0e0);
+	--color-text-body: var(--color-text-body, #d4dbd2);
+	--color-text-highlight: var(--color-text-highlight, #f5de33);
+	--color-text-muted: var(--color-text-muted, #94a89a);
+	--color-text-footer: var(--color-text-footer, #d0ded4);
 }
 
 :root {

@@ -1,6 +1,7 @@
 <script lang="ts">
 	const socials = [
 		{ name: 'Instagram', url: 'https://instagram.com/shersten.the.golden' },
+		{ name: 'TikTok', url: 'https://www.tiktok.com/@shersten.the.golden' },
 		{ name: 'Email', url: 'mailto:contact@sherstenthegolden.com' }
 	];
 </script>

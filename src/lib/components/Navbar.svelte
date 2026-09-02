@@ -129,6 +129,17 @@
 			>
 				About
 			</a>
+			<a
+				href="/links"
+				aria-current={currentPath.startsWith('/links') ? 'page' : undefined}
+				class="font-serif text-sm uppercase tracking-widest transition-colors {currentPath.startsWith(
+					'/links'
+				)
+					? 'border-b border-text-main pb-0.5 font-semibold text-text-main'
+					: 'text-text-muted hover:text-text-main'}"
+			>
+				Links
+			</a>
 		</div>
 
 		<!-- Mobile Button: On home, only shown when snapped to the top; on other pages always shown on mobile -->
@@ -204,6 +215,16 @@
 						: 'text-text-muted'}"
 				>
 					About
+				</a>
+				<a
+					href="/links"
+					onclick={closeMenu}
+					aria-current={currentPath.startsWith('/links') ? 'page' : undefined}
+					class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath.startsWith('/links')
+						? 'font-semibold text-text-main'
+						: 'text-text-muted'}"
+				>
+					Links
 				</a>
 			</div>
 		</div>
