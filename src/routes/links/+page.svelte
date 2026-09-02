@@ -1,26 +1,10 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import QRCode from 'qrcode';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import avatarImg from '$lib/assets/profile/main.jpg?w=160;320&format=avif;webp;jpg&as=picture';
+	import type { PageData } from './$types';
 
-	let qrSvg = $state('');
-
-	onMount(async () => {
-		try {
-			qrSvg = await QRCode.toString('https://sherstenthegolden.com/links', {
-				type: 'svg',
-				margin: 1,
-				color: {
-					dark: '#0b1a28',
-					light: '#eff0e0'
-				}
-			});
-		} catch (err) {
-			console.error('Failed to generate QR code', err);
-		}
-	});
+	let { data }: { data: PageData } = $props();
 
 	const links = [
 		{
@@ -91,7 +75,7 @@
 			<!-- Profile Card Header -->
 			<div class="flex flex-col items-center text-center">
 				<div
-					class="relative mb-3 h-20 w-20 min-h-[5rem] min-w-[5rem] max-h-20 max-w-20 shrink-0 overflow-hidden rounded-full shadow-[0_0_15px_rgba(45,90,67,0.4)]"
+					class="relative mb-3 h-20 max-h-20 min-h-[5rem] w-20 max-w-20 min-w-[5rem] shrink-0 overflow-hidden rounded-full shadow-[0_0_15px_rgba(45,90,67,0.4)]"
 					style="width: 80px; height: 80px; border-radius: 9999px;"
 				>
 					<picture class="block h-full w-full" style="width: 100%; height: 100%;">
@@ -130,7 +114,7 @@
 							: 'border-border-main/70 bg-bg-card/40 hover:border-border-accent hover:bg-bg-card/80 hover:shadow-[0_0_15px_rgba(45,90,67,0.3)]'}"
 					>
 						<span
-							class="font-serif text-base font-semibold leading-snug tracking-wider transition-colors duration-200 {link.highlight
+							class="font-serif text-base leading-snug font-semibold tracking-wider transition-colors duration-200 {link.highlight
 								? 'text-text-highlight group-hover:brightness-110'
 								: 'text-text-main group-hover:text-text-highlight'}"
 						>
@@ -175,13 +159,11 @@
 				<div
 					class="mt-2.5 flex h-28 w-28 items-center justify-center rounded-lg bg-text-main p-1.5 shadow-inner"
 				>
-					{#if qrSvg}
+					{#if data.qrSvg}
 						<div class="h-full w-full [&>svg]:h-full [&>svg]:w-full" aria-hidden="true">
 							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-							{@html qrSvg}
+							{@html data.qrSvg}
 						</div>
-					{:else}
-						<div class="h-full w-full animate-pulse rounded bg-black/10"></div>
 					{/if}
 				</div>
 			</aside>
