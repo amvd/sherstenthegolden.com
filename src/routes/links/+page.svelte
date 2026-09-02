@@ -61,7 +61,7 @@
 			<!-- Profile Card Header -->
 			<div class="flex flex-col items-center text-center">
 				<div
-					class="relative mb-3 h-20 w-20 min-h-[5rem] min-w-[5rem] max-h-20 max-w-20 shrink-0 overflow-hidden rounded-full border-2 border-border-accent shadow-[0_0_15px_rgba(45,90,67,0.4)]"
+					class="relative mb-3 h-20 w-20 min-h-[5rem] min-w-[5rem] max-h-20 max-w-20 shrink-0 overflow-hidden rounded-full shadow-[0_0_15px_rgba(45,90,67,0.4)]"
 					style="width: 80px; height: 80px; border-radius: 9999px;"
 				>
 					<picture class="block h-full w-full" style="width: 100%; height: 100%;">

@@ -80,15 +80,19 @@
 	<div
 		class="mx-auto flex max-w-6xl items-center px-6 py-3.5 {isHome
 			? 'justify-center'
-			: 'justify-between'}"
+			: currentPath === '/links'
+				? 'justify-center md:justify-between'
+				: 'justify-between'}"
 	>
-		<!-- Brand Logo/Name (Shown only on subpages) -->
+		<!-- Brand Logo/Name (Shown only on subpages, hidden on mobile for /links) -->
 		{#if !isHome}
 			<a
 				href="/"
 				onclick={closeMenu}
 				aria-label="Shersten the Golden - Return to home"
-				class="font-serif text-lg font-bold tracking-wider text-text-main transition-colors hover:text-white"
+				class="font-serif text-lg font-bold tracking-wider text-text-main transition-colors hover:text-white {currentPath === '/links'
+					? 'hidden md:block'
+					: 'block'}"
 			>
 				Shersten the Golden
 			</a>
