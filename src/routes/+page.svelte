@@ -121,7 +121,29 @@
 			</a>
 		</div>
 
-		<!-- Sticky Navbar (Center-aligned on Home, positioned after the title blurb and title image) -->
+		<!-- Static Mobile In-Page Links (Rendered in normal document flow on mobile so there are zero sticky layout shifts) -->
+		<div class="flex flex-col items-center gap-3 py-4 text-center md:hidden">
+			<a
+				href="/portfolio"
+				class="font-serif text-sm uppercase tracking-widest text-text-main transition-colors hover:text-text-highlight"
+			>
+				Portfolio
+			</a>
+			<a
+				href="/about"
+				class="font-serif text-sm uppercase tracking-widest text-text-main transition-colors hover:text-text-highlight"
+			>
+				About
+			</a>
+			<a
+				href="/links"
+				class="font-serif text-sm uppercase tracking-widest text-text-main transition-colors hover:text-text-highlight"
+			>
+				Links
+			</a>
+		</div>
+
+		<!-- Sticky Navbar (Positioned in normal flow on desktop, sticks on scroll with smooth sticky hamburger on mobile) -->
 		<Navbar isHome={true} />
 
 		<!-- Alternating Showcases with Seamless Full Edge-to-Edge Fading & Parallax -->

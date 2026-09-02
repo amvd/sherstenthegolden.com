@@ -5,15 +5,19 @@
 
 	// Tracks whether the navbar is currently stuck at the top of the viewport
 	let isSnapped = $state(false);
-	// For user manually expanding/collapsing the mobile drawer
-	let isMobileMenuOpen = $state(false);
+	// For user manually expanding/collapsing the mobile drawer when snapped / on subpages
+	let isMobileDrawerOpen = $state(false);
 
 	let navElement: HTMLElement | null = $state(null);
 	let initialNavTop = $state(0);
 
 	const currentPath = $derived(page.url.pathname);
 
-	// Measure initial position and track scroll for desktop snapping on home page
+	// On home: mobile drawer is only open if user explicitly opened it while snapped
+	// On subpages: mobile drawer opens/closes on user click
+	const isDrawerOpen = $derived(isHome ? isSnapped && isMobileDrawerOpen : isMobileDrawerOpen);
+
+	// Measure initial position and track scroll for homepage snapping
 	$effect(() => {
 		if (!isHome || typeof window === 'undefined') return;
 
@@ -33,6 +37,9 @@
 						const snapped = window.scrollY >= (initialNavTop > 0 ? initialNavTop - 2 : 500);
 						if (snapped !== isSnapped) {
 							isSnapped = snapped;
+							if (!snapped) {
+								isMobileDrawerOpen = false;
+							}
 						}
 					}
 					ticking = false;
@@ -57,19 +64,22 @@
 		};
 	});
 
-	function toggleMenu() {
-		isMobileMenuOpen = !isMobileMenuOpen;
+	function toggleDrawer() {
+		isMobileDrawerOpen = !isMobileDrawerOpen;
 	}
 
-	function closeMenu() {
-		isMobileMenuOpen = false;
+	function closeDrawer() {
+		isMobileDrawerOpen = false;
 	}
 </script>
 
 <nav
 	bind:this={navElement}
 	aria-label="Main Navigation"
-	class="sticky top-0 z-40 w-full border-b border-border-main/60 bg-bg-main/90 backdrop-blur-md will-change-transform"
+	class="sticky top-0 z-40 w-full border-border-main/60 bg-bg-main/90 backdrop-blur-md will-change-transform {isHome &&
+	!isSnapped
+		? 'hidden border-b-0 md:block md:border-b'
+		: 'border-b'}"
 >
 	<div
 		class="mx-auto flex max-w-6xl items-center px-6 py-3.5 {isHome
@@ -82,7 +92,7 @@
 		{#if !isHome}
 			<a
 				href="/"
-				onclick={closeMenu}
+				onclick={closeDrawer}
 				aria-label="Shersten the Golden - Return to home"
 				class="font-serif text-lg font-bold tracking-wider text-text-main transition-colors hover:text-white {currentPath === '/links'
 					? 'hidden md:block'
@@ -92,7 +102,7 @@
 			</a>
 		{/if}
 
-		<!-- Desktop Links (Always visible on desktop md:flex) -->
+		<!-- Desktop Links (Visible on desktop md:flex across all pages) -->
 		<div class="hidden items-center gap-8 md:flex">
 			{#if !isHome}
 				<a
@@ -140,43 +150,45 @@
 			</a>
 		</div>
 
-		<!-- Mobile Button: Visible on mobile across all pages -->
-		<button
-			type="button"
-			onclick={toggleMenu}
-			aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-			aria-expanded={isMobileMenuOpen}
-			class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 text-text-main focus:outline-none hover:text-white md:hidden"
-		>
-			{#if isMobileMenuOpen}
-				<!-- Close 'X' Icon -->
-				<svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M6 18L18 6M6 6l12 12"
-					/>
-				</svg>
-			{:else}
-				<!-- Hamburger Icon -->
-				<svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 6h16M4 12h16M4 18h16"
-					/>
-				</svg>
-			{/if}
-		</button>
+		<!-- Mobile Toggle Button (Visible on subpages, and on home when sticky/snapped) -->
+		{#if !isHome || isSnapped}
+			<button
+				type="button"
+				onclick={toggleDrawer}
+				aria-label={isDrawerOpen ? 'Close navigation menu' : 'Open navigation menu'}
+				aria-expanded={isDrawerOpen}
+				class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 text-text-main focus:outline-none hover:text-white md:hidden"
+			>
+				{#if isDrawerOpen}
+					<!-- Close 'X' Icon -->
+					<svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				{:else}
+					<!-- Hamburger Icon -->
+					<svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 6h16M4 12h16M4 18h16"
+						/>
+					</svg>
+				{/if}
+			</button>
+		{/if}
 	</div>
 
-	<!-- Mobile Links Menu Drawer with smooth max-height & opacity transition -->
+	<!-- Mobile Links Menu Drawer with smooth height & opacity transition -->
 	<div
 		class="overflow-hidden border-border-main/50 bg-bg-main/95 transition-[max-height,opacity] duration-300 ease-in-out md:hidden {isHome
 			? 'text-center'
-			: 'text-left'} {isMobileMenuOpen
+			: 'text-left'} {isDrawerOpen
 			? 'max-h-80 border-t opacity-100'
 			: 'max-h-0 border-t-0 opacity-0 pointer-events-none'}"
 	>
@@ -184,7 +196,7 @@
 			{#if !isHome}
 				<a
 					href="/"
-					onclick={closeMenu}
+					onclick={closeDrawer}
 					aria-current={currentPath === '/' ? 'page' : undefined}
 					class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath === '/'
 						? 'font-semibold text-text-main'
@@ -195,7 +207,7 @@
 			{/if}
 			<a
 				href="/portfolio"
-				onclick={closeMenu}
+				onclick={closeDrawer}
 				aria-current={currentPath.startsWith('/portfolio') ? 'page' : undefined}
 				class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath.startsWith(
 					'/portfolio'
@@ -207,7 +219,7 @@
 			</a>
 			<a
 				href="/about"
-				onclick={closeMenu}
+				onclick={closeDrawer}
 				aria-current={currentPath.startsWith('/about') ? 'page' : undefined}
 				class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath.startsWith(
 					'/about'
@@ -219,7 +231,7 @@
 			</a>
 			<a
 				href="/links"
-				onclick={closeMenu}
+				onclick={closeDrawer}
 				aria-current={currentPath.startsWith('/links') ? 'page' : undefined}
 				class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath.startsWith(
 					'/links'
