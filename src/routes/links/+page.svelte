@@ -51,6 +51,17 @@
 
 <svelte:head>
 	<title>Links | Shersten the Golden</title>
+	<meta
+		name="description"
+		content="Find all official links, social channels, portfolio showcases, and contact info for Shersten the Golden."
+	/>
+	<link rel="canonical" href="https://sherstenthegolden.com/links" />
+	<meta property="og:url" content="https://sherstenthegolden.com/links" />
+	<meta property="og:title" content="Links | Shersten the Golden" />
+	<meta
+		property="og:description"
+		content="Find all official links, social channels, portfolio showcases, and contact info for Shersten the Golden."
+	/>
 </svelte:head>
 
 <div class="flex min-h-screen flex-col justify-between bg-bg-main text-text-main">

@@ -16,6 +16,17 @@
 
 <svelte:head>
 	<title>Portfolio | Shersten the Golden</title>
+	<meta
+		name="description"
+		content="A showcase of cosplay creations, prop crafting, and high-fantasy character photography by Shersten the Golden."
+	/>
+	<link rel="canonical" href="https://sherstenthegolden.com/portfolio" />
+	<meta property="og:url" content="https://sherstenthegolden.com/portfolio" />
+	<meta property="og:title" content="Portfolio | Shersten the Golden" />
+	<meta
+		property="og:description"
+		content="A showcase of cosplay creations, prop crafting, and high-fantasy character photography."
+	/>
 </svelte:head>
 
 <div class="flex min-h-screen flex-col justify-between bg-bg-main text-text-main">

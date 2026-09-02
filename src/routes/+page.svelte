@@ -46,7 +46,18 @@
 <svelte:window bind:scrollY bind:innerHeight />
 
 <svelte:head>
-	<title>Shersten the Golden</title>
+	<title>Shersten the Golden | Fantasy Cosplayer & Model</title>
+	<meta
+		name="description"
+		content="Fantasy cosplayer, prop maker, and themed model bringing legendary characters to life."
+	/>
+	<link rel="canonical" href="https://sherstenthegolden.com/" />
+	<meta property="og:url" content="https://sherstenthegolden.com/" />
+	<meta property="og:title" content="Shersten the Golden | Fantasy Cosplayer & Model" />
+	<meta
+		property="og:description"
+		content="Fantasy cosplayer, prop maker, and themed model bringing legendary characters to life."
+	/>
 </svelte:head>
 
 <div class="flex min-h-screen flex-col justify-between bg-bg-main text-text-main">

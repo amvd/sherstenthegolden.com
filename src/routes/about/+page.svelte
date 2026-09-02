@@ -6,6 +6,17 @@
 
 <svelte:head>
 	<title>About | Shersten the Golden</title>
+	<meta
+		name="description"
+		content="Learn about Shersten the Golden — Colorado-based fantasy cosplayer, artisan prop maker, and themed model."
+	/>
+	<link rel="canonical" href="https://sherstenthegolden.com/about" />
+	<meta property="og:url" content="https://sherstenthegolden.com/about" />
+	<meta property="og:title" content="About | Shersten the Golden" />
+	<meta
+		property="og:description"
+		content="Learn about Shersten the Golden — Colorado-based fantasy cosplayer, artisan prop maker, and themed model."
+	/>
 </svelte:head>
 
 <div class="flex min-h-screen flex-col justify-between bg-bg-main text-text-main">
