@@ -8,62 +8,39 @@
 	// For user manually expanding/collapsing the mobile drawer when snapped / on subpages
 	let isMobileDrawerOpen = $state(false);
 
-	let navElement: HTMLElement | null = $state(null);
-	let initialNavTop = $state(0);
-
 	const currentPath = $derived(page.url.pathname);
 
 	// On home: mobile drawer is only open if user explicitly opened it while snapped
 	// On subpages: mobile drawer opens/closes on user click
 	const isDrawerOpen = $derived(isHome ? isSnapped && isMobileDrawerOpen : isMobileDrawerOpen);
 
-	// Measure initial position and track scroll for homepage snapping
+	// Track homepage snapping using IntersectionObserver (Zero scroll-listener overhead)
 	$effect(() => {
 		if (!isHome || typeof window === 'undefined') return;
 
-		let ticking = false;
+		const sentinel = document.getElementById('home-nav-sentinel');
+		if (!sentinel) return;
 
-		const updateInitialTop = () => {
-			const sentinel = document.getElementById('home-nav-sentinel');
-			if (sentinel) {
-				const rect = sentinel.getBoundingClientRect();
-				initialNavTop = rect.top + window.scrollY;
-			} else if (navElement) {
-				const rect = navElement.getBoundingClientRect();
-				initialNavTop = rect.top + window.scrollY;
-			}
-		};
-
-		const handleScroll = () => {
-			if (!ticking) {
-				window.requestAnimationFrame(() => {
-					// Snap when scrolled past the sentinel (bottom of the vertical in-page links)
-					const snapped = window.scrollY >= (initialNavTop > 0 ? initialNavTop : 600);
+		const observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					// Snapped when the sentinel has scrolled above the top of the viewport
+					const snapped = !entry.isIntersecting && entry.boundingClientRect.top < 0;
 					if (snapped !== isSnapped) {
 						isSnapped = snapped;
 						if (!snapped) {
 							isMobileDrawerOpen = false;
 						}
 					}
-					ticking = false;
-				});
-				ticking = true;
-			}
-		};
+				}
+			},
+			{ threshold: 0 }
+		);
 
-		// Run once after initial layout renders
-		const timer = setTimeout(() => {
-			updateInitialTop();
-			handleScroll();
-		}, 100);
-
-		window.addEventListener('scroll', handleScroll, { passive: true });
-		window.addEventListener('resize', updateInitialTop, { passive: true });
+		observer.observe(sentinel);
 
 		return () => {
-			clearTimeout(timer);
-			window.removeEventListener('scroll', handleScroll);
-			window.removeEventListener('resize', updateInitialTop);
+			observer.disconnect();
 		};
 	});
 
@@ -77,13 +54,12 @@
 </script>
 
 <nav
-	bind:this={navElement}
 	aria-label="Main Navigation"
-	class="z-40 w-full bg-bg-main/90 backdrop-blur-md will-change-transform {isHome
+	class="z-40 w-full bg-bg-main/90 {isHome
 		? isSnapped
-			? 'fixed top-0 left-0 border-b border-border-main/60 md:sticky'
-			: 'hidden border-b-0 md:sticky md:top-0 md:block md:border-b md:border-border-main/60'
-		: 'sticky top-0 border-b border-border-main/60'}"
+			? 'fixed top-0 left-0 border-b border-border-main/60 backdrop-blur-md md:sticky'
+			: 'hidden border-b-0 md:sticky md:top-0 md:block md:border-b md:border-border-main/60 md:backdrop-blur-md'
+		: 'sticky top-0 border-b border-border-main/60 backdrop-blur-md'}"
 >
 	<div
 		class="mx-auto flex max-w-6xl items-center px-6 py-3.5 {isHome

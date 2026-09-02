@@ -53,13 +53,14 @@
 						<div class="relative overflow-hidden">
 							<picture class="block w-full">
 								{#each Object.entries(item.picture.sources) as [format, srcset]}
-									<source {srcset} type={'image/' + format} />
+									<source {srcset} type={'image/' + format} sizes="(min-width: 640px) 50vw, 100vw" />
 								{/each}
 								<img
 									src={item.picture.img.src}
 									width={item.picture.img.w}
 									height={item.picture.img.h}
 									alt={item.alt}
+									sizes="(min-width: 640px) 50vw, 100vw"
 									class="h-auto w-full object-cover transition-transform duration-500 group-hover:scale-105"
 									loading="lazy"
 									decoding="async"

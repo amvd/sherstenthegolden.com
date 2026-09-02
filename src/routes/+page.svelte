@@ -39,9 +39,6 @@
 		}
 	];
 
-	let scrollY = $state(0);
-	let innerHeight = $state(800);
-
 	/**
 	 * High-Performance Zero-DOM-Recalc Parallax:
 	 * - Measures element geometry (offsetTop & offsetHeight) strictly on mount/resize.
@@ -74,10 +71,26 @@
 		renderParallax();
 	}
 
+	let heroNode: HTMLElement | null = null;
+
+	function heroParallax(node: HTMLElement) {
+		heroNode = node;
+		return {
+			destroy() {
+				heroNode = null;
+			}
+		};
+	}
+
 	function renderParallax() {
 		const currentScrollY = window.scrollY;
 		const vHeight = window.innerHeight;
 		const isDesktop = window.innerWidth >= 768;
+
+		// Direct GPU transform for hero banner without triggering Svelte rune updates
+		if (heroNode && currentScrollY < vHeight * 1.2) {
+			heroNode.style.transform = `translate3d(0, ${currentScrollY * 0.25}px, 0)`;
+		}
 
 		for (const entry of parallaxRegistry) {
 			if (!entry.isIntersecting) continue;
@@ -104,8 +117,14 @@
 		}
 	}
 
-	function getSharedObserver(): IntersectionObserver {
-		if (!sharedObserver && typeof window !== 'undefined') {
+	function getSharedObserver(): IntersectionObserver | null {
+		if (typeof window === 'undefined') return null;
+
+		// Respect user accessibility preference: Disable parallax completely for reduced motion
+		const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (prefersReducedMotion) return null;
+
+		if (!sharedObserver) {
 			sharedObserver = new IntersectionObserver(
 				(entries) => {
 					for (const obsEntry of entries) {
@@ -124,12 +143,16 @@
 			);
 
 			window.addEventListener('scroll', onGlobalScroll, { passive: true });
-			window.addEventListener('resize', () => {
-				measureAllParallax();
-				onGlobalScroll();
-			}, { passive: true });
+			window.addEventListener(
+				'resize',
+				() => {
+					measureAllParallax();
+					onGlobalScroll();
+				},
+				{ passive: true }
+			);
 		}
-		return sharedObserver!;
+		return sharedObserver;
 	}
 
 	function showcaseParallax(
@@ -140,6 +163,10 @@
 			horizontal: 20
 		}
 	) {
+		if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+			return {};
+		}
+
 		const frame = node.parentElement ?? node;
 		const entry: ParallaxEntry = {
 			node,
@@ -154,7 +181,9 @@
 
 		parallaxRegistry.add(entry);
 		const observer = getSharedObserver();
-		observer.observe(frame);
+		if (observer) {
+			observer.observe(frame);
+		}
 
 		// Initial measure
 		const timer = setTimeout(() => {
@@ -168,7 +197,9 @@
 			destroy() {
 				clearTimeout(timer);
 				parallaxRegistry.delete(entry);
-				observer.unobserve(frame);
+				if (observer) {
+					observer.unobserve(frame);
+				}
 				if (parallaxRegistry.size === 0 && sharedObserver) {
 					sharedObserver.disconnect();
 					sharedObserver = null;
@@ -178,8 +209,6 @@
 		};
 	}
 </script>
-
-<svelte:window bind:scrollY bind:innerHeight />
 
 <svelte:head>
 	<title>Shersten the Golden | Fantasy Cosplayer & Model</title>
@@ -215,12 +244,12 @@
 				<source {srcset} type={'image/' + format} />
 			{/each}
 			<img
+				use:heroParallax
 				src={profileImg.img.src}
 				width={profileImg.img.w}
 				height={profileImg.img.h}
 				alt="Shersten the Golden"
-				class="h-full w-full object-cover object-center will-change-transform [backface-visibility:hidden]"
-				style:transform="translateY({scrollY * 0.25}px)"
+				class="h-full w-full object-cover object-center [backface-visibility:hidden]"
 				loading="eager"
 				fetchpriority="high"
 				decoding="async"
@@ -323,13 +352,14 @@
 						>
 							<picture class="block w-full">
 								{#each Object.entries(item.picture.sources) as [format, srcset]}
-									<source {srcset} type={'image/' + format} />
+									<source {srcset} type={'image/' + format} sizes="(min-width: 768px) 60vw, 100vw" />
 								{/each}
 								<img
 									src={item.picture.img.src}
 									width={item.picture.img.w}
 									height={item.picture.img.h}
 									alt={item.alt}
+									sizes="(min-width: 768px) 60vw, 100vw"
 									class="h-auto w-full object-contain"
 									loading="lazy"
 									decoding="async"

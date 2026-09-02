@@ -56,13 +56,14 @@
 				<div class="relative order-2 w-full overflow-hidden md:order-1 md:w-1/2">
 					<picture class="block w-full">
 						{#each Object.entries(aboutImg.sources) as [format, srcset]}
-							<source {srcset} type={'image/' + format} />
+							<source {srcset} type={'image/' + format} sizes="(min-width: 768px) 50vw, 100vw" />
 						{/each}
 						<img
 							src={aboutImg.img.src}
 							width={aboutImg.img.w}
 							height={aboutImg.img.h}
 							alt="Shersten the Golden - About"
+							sizes="(min-width: 768px) 50vw, 100vw"
 							class="h-auto w-full object-cover"
 							loading="eager"
 							decoding="async"
