@@ -3,20 +3,77 @@
 
 	let { isHome = false }: { isHome?: boolean } = $props();
 
-	let mobileMenuOpen = $state(false);
+	// Tracks whether the navbar is currently stuck at the top of the viewport
+	let isSnapped = $state(false);
+	// For user manually expanding/collapsing when snapped
+	let userExpandedWhenSnapped = $state(false);
+
+	let navElement: HTMLElement | null = $state(null);
+	let initialNavTop = $state(0);
 
 	const currentPath = $derived(page.url.pathname);
 
+	// On home: menu is open when NOT snapped. When snapped, only open if user toggled it open.
+	// On other pages: menu is closed by default unless user toggles it open.
+	const isMenuOpen = $derived(
+		isHome ? (!isSnapped ? true : userExpandedWhenSnapped) : userExpandedWhenSnapped
+	);
+
+	// Measure initial position and track scroll
+	$effect(() => {
+		if (!isHome || typeof window === 'undefined') return;
+
+		const updateInitialTop = () => {
+			if (navElement) {
+				const rect = navElement.getBoundingClientRect();
+				initialNavTop = rect.top + window.scrollY;
+			}
+		};
+
+		const handleScroll = () => {
+			if (!navElement) return;
+			// When scroll reaches or passes initial nav position, it is snapped at top
+			const snapped = window.scrollY >= (initialNavTop > 0 ? initialNavTop - 2 : 500);
+
+			if (snapped !== isSnapped) {
+				isSnapped = snapped;
+				if (!snapped) {
+					// Reset manual toggle when returning back to top
+					userExpandedWhenSnapped = false;
+				} else {
+					// Collapsed by default upon snapping
+					userExpandedWhenSnapped = false;
+				}
+			}
+		};
+
+		// Run once after initial layout renders
+		const timer = setTimeout(() => {
+			updateInitialTop();
+			handleScroll();
+		}, 100);
+
+		window.addEventListener('scroll', handleScroll, { passive: true });
+		window.addEventListener('resize', updateInitialTop, { passive: true });
+
+		return () => {
+			clearTimeout(timer);
+			window.removeEventListener('scroll', handleScroll);
+			window.removeEventListener('resize', updateInitialTop);
+		};
+	});
+
 	function toggleMenu() {
-		mobileMenuOpen = !mobileMenuOpen;
+		userExpandedWhenSnapped = !userExpandedWhenSnapped;
 	}
 
 	function closeMenu() {
-		mobileMenuOpen = false;
+		userExpandedWhenSnapped = false;
 	}
 </script>
 
 <nav
+	bind:this={navElement}
 	class="sticky top-0 z-40 w-full border-b border-border-main/60 bg-bg-main/90 backdrop-blur-md transition-all duration-200"
 >
 	<div
@@ -69,40 +126,42 @@
 			</a>
 		</div>
 
-		<!-- Mobile Hamburger Button -->
-		<button
-			type="button"
-			onclick={toggleMenu}
-			aria-label="Toggle Navigation Menu"
-			aria-expanded={mobileMenuOpen}
-			class="p-1.5 text-text-main focus:outline-none hover:text-white md:hidden"
-		>
-			{#if mobileMenuOpen}
-				<!-- Close Icon -->
-				<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M6 18L18 6M6 6l12 12"
-					/>
-				</svg>
-			{:else}
-				<!-- Hamburger Icon -->
-				<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 6h16M4 12h16M4 18h16"
-					/>
-				</svg>
-			{/if}
-		</button>
+		<!-- Mobile Button: On home, only shown when snapped to the top; on other pages always shown on mobile -->
+		{#if !isHome || isSnapped}
+			<button
+				type="button"
+				onclick={toggleMenu}
+				aria-label="Toggle Navigation Menu"
+				aria-expanded={isMenuOpen}
+				class="p-1.5 text-text-main focus:outline-none hover:text-white md:hidden animate-fade-in"
+			>
+				{#if isMenuOpen}
+					<!-- Close 'X' Icon (only when expanded after being collapsed) -->
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				{:else}
+					<!-- Hamburger Icon -->
+					<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 6h16M4 12h16M4 18h16"
+						/>
+					</svg>
+				{/if}
+			</button>
+		{/if}
 	</div>
 
-	<!-- Mobile Dropdown Menu -->
-	{#if mobileMenuOpen}
+	<!-- Mobile Links Menu Drawer -->
+	{#if isMenuOpen}
 		<div
 			class="animate-fade-in border-t border-border-main/50 bg-bg-main/95 px-6 py-4 md:hidden {isHome
 				? 'text-center'
