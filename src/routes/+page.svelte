@@ -43,10 +43,95 @@
 	let innerHeight = $state(800);
 
 	/**
-	 * Parallax Svelte Action:
-	 * Begins with the photo aligned to the top (0px) when the viewer reaches it,
-	 * and translates the image downward (+maxTravelY px) and subtly inward (+maxTravelX px) as the user scrolls.
+	 * High-Performance Zero-DOM-Recalc Parallax:
+	 * - Measures element geometry (offsetTop & offsetHeight) strictly on mount/resize.
+	 * - During scroll: Zero getBoundingClientRect() calls; calculates progress from cached values via single RAF dispatcher.
+	 * - Culls calculations completely when elements are offscreen via shared IntersectionObserver.
 	 */
+	type ParallaxEntry = {
+		node: HTMLElement;
+		frame: HTMLElement;
+		top: number;
+		height: number;
+		isIntersecting: boolean;
+		mobile: number;
+		desktop: number;
+		horizontal: number;
+	};
+
+	const parallaxRegistry = new Set<ParallaxEntry>();
+	let sharedObserver: IntersectionObserver | null = null;
+	let globalRafId: number | null = null;
+	let lastScrollY = -1;
+
+	function measureAllParallax() {
+		if (typeof window === 'undefined') return;
+		for (const entry of parallaxRegistry) {
+			const rect = entry.frame.getBoundingClientRect();
+			entry.top = rect.top + window.scrollY;
+			entry.height = rect.height;
+		}
+		renderParallax();
+	}
+
+	function renderParallax() {
+		const currentScrollY = window.scrollY;
+		const vHeight = window.innerHeight;
+		const isDesktop = window.innerWidth >= 768;
+
+		for (const entry of parallaxRegistry) {
+			if (!entry.isIntersecting) continue;
+
+			const maxTravelY = isDesktop ? entry.desktop : entry.mobile;
+			const maxTravelX = isDesktop ? entry.horizontal : entry.horizontal * 0.4;
+
+			const totalDistance = vHeight + entry.height;
+			// Relative distance from bottom of screen to top of element
+			const travel = currentScrollY + vHeight - entry.top;
+			const progress = Math.max(0, Math.min(1, travel / totalDistance));
+
+			const translateY = progress * maxTravelY;
+			const translateX = progress * maxTravelX;
+			entry.node.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
+		}
+		globalRafId = null;
+		lastScrollY = currentScrollY;
+	}
+
+	function onGlobalScroll() {
+		if (globalRafId === null) {
+			globalRafId = window.requestAnimationFrame(renderParallax);
+		}
+	}
+
+	function getSharedObserver(): IntersectionObserver {
+		if (!sharedObserver && typeof window !== 'undefined') {
+			sharedObserver = new IntersectionObserver(
+				(entries) => {
+					for (const obsEntry of entries) {
+						for (const item of parallaxRegistry) {
+							if (item.frame === obsEntry.target || item.node === obsEntry.target) {
+								item.isIntersecting = obsEntry.isIntersecting;
+								if (item.isIntersecting) {
+									onGlobalScroll();
+								}
+								break;
+							}
+						}
+					}
+				},
+				{ rootMargin: '150px 0px 150px 0px' }
+			);
+
+			window.addEventListener('scroll', onGlobalScroll, { passive: true });
+			window.addEventListener('resize', () => {
+				measureAllParallax();
+				onGlobalScroll();
+			}, { passive: true });
+		}
+		return sharedObserver!;
+	}
+
 	function showcaseParallax(
 		node: HTMLElement,
 		options: { mobile?: number; desktop?: number; horizontal?: number } = {
@@ -55,36 +140,40 @@
 			horizontal: 20
 		}
 	) {
-		function update() {
-			const frame = node.parentElement;
-			if (!frame) return;
-			const rect = frame.getBoundingClientRect();
-			const vHeight = window.innerHeight;
-			const isDesktop = window.innerWidth >= 768;
-			const maxTravelY = isDesktop ? (options.desktop ?? 240) : (options.mobile ?? 140);
-			const baseTravelX = options.horizontal ?? 20;
-			const maxTravelX = isDesktop ? baseTravelX : baseTravelX * 0.4;
-			// Total travel distance from when top of frame enters bottom of screen to when bottom leaves top
-			const totalDistance = vHeight + rect.height;
-			// How far the frame has traveled through the screen
-			const travel = vHeight - rect.top;
-			// Clamped progress from 0 (just entering bottom) to 1 (leaving top)
-			const progress = Math.max(0, Math.min(1, travel / totalDistance));
-			// Translates downward and subtly horizontally
-			const translateY = progress * maxTravelY;
-			const translateX = progress * maxTravelX;
-			node.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
-		}
+		const frame = node.parentElement ?? node;
+		const entry: ParallaxEntry = {
+			node,
+			frame,
+			top: 0,
+			height: 0,
+			isIntersecting: false,
+			mobile: options.mobile ?? 140,
+			desktop: options.desktop ?? 240,
+			horizontal: options.horizontal ?? 20
+		};
 
-		window.addEventListener('scroll', update, { passive: true });
-		window.addEventListener('resize', update, { passive: true });
-		// Initial update once mounted
-		update();
+		parallaxRegistry.add(entry);
+		const observer = getSharedObserver();
+		observer.observe(frame);
+
+		// Initial measure
+		const timer = setTimeout(() => {
+			const rect = frame.getBoundingClientRect();
+			entry.top = rect.top + window.scrollY;
+			entry.height = rect.height;
+			onGlobalScroll();
+		}, 50);
 
 		return {
 			destroy() {
-				window.removeEventListener('scroll', update);
-				window.removeEventListener('resize', update);
+				clearTimeout(timer);
+				parallaxRegistry.delete(entry);
+				observer.unobserve(frame);
+				if (parallaxRegistry.size === 0 && sharedObserver) {
+					sharedObserver.disconnect();
+					sharedObserver = null;
+					window.removeEventListener('scroll', onGlobalScroll);
+				}
 			}
 		};
 	}
@@ -105,11 +194,19 @@
 		property="og:description"
 		content="Fantasy cosplayer, prop maker, and themed model bringing legendary characters to life."
 	/>
+	<!-- LCP Image Preload for Instant First Paint -->
+	<link
+		rel="preload"
+		as="image"
+		href={profileImg.img.src}
+		imagesrcset={profileImg.sources.avif ?? profileImg.sources.webp ?? profileImg.img.src}
+		fetchpriority="high"
+	/>
 </svelte:head>
 
 <div class="flex min-h-screen flex-col justify-between bg-bg-main text-text-main">
-	<!-- Full-width Hero Banner with Parallax -->
-	<header class="relative h-[70vh] w-full overflow-hidden sm:h-[80vh]">
+	<!-- Full-width Hero Banner with Parallax (Using dvh for seamless mobile address bar transitions) -->
+	<header class="relative h-[70dvh] w-full overflow-hidden sm:h-[80dvh]">
 		<!-- Parallax Image Layer with Top Buffer and early bottom fade to prevent edge exposure on scroll -->
 		<picture
 			class="absolute -top-[15%] inset-x-0 h-[135%] w-full [mask-image:linear-gradient(to_bottom,_black_30%,_transparent_72%)] [-webkit-mask-image:linear-gradient(to_bottom,_black_30%,_transparent_72%)]"
@@ -122,9 +219,10 @@
 				width={profileImg.img.w}
 				height={profileImg.img.h}
 				alt="Shersten the Golden"
-				class="h-full w-full object-cover object-center will-change-transform"
+				class="h-full w-full object-cover object-center will-change-transform [backface-visibility:hidden]"
 				style:transform="translateY({scrollY * 0.25}px)"
 				loading="eager"
+				fetchpriority="high"
 				decoding="async"
 			/>
 		</picture>
@@ -206,7 +304,7 @@
 			{#each showcases as item, i}
 				{@const isEven = i % 2 === 0}
 				<div
-					class="relative flex w-full flex-col items-center md:flex-row {isEven
+					class="relative flex w-full flex-col items-center [content-visibility:auto] [contain-intrinsic-size:auto_700px] md:flex-row {isEven
 						? 'md:flex-row'
 						: 'md:flex-row-reverse'}"
 				>
@@ -221,7 +319,7 @@
 								desktop: 240,
 								horizontal: isEven ? 24 : -24
 							}}
-							class="relative top-0 w-full scale-105 will-change-transform [mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_100%)] [-webkit-mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_100%)]"
+							class="relative top-0 w-full scale-105 will-change-transform [backface-visibility:hidden] [mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_100%)] [-webkit-mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_100%)]"
 						>
 							<picture class="block w-full">
 								{#each Object.entries(item.picture.sources) as [format, srcset]}
