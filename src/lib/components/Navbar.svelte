@@ -5,23 +5,19 @@
 
 	// Tracks whether the navbar is currently stuck at the top of the viewport
 	let isSnapped = $state(false);
-	// For user manually expanding/collapsing when snapped
-	let userExpandedWhenSnapped = $state(false);
+	// For user manually expanding/collapsing the mobile drawer
+	let isMobileMenuOpen = $state(false);
 
 	let navElement: HTMLElement | null = $state(null);
 	let initialNavTop = $state(0);
 
 	const currentPath = $derived(page.url.pathname);
 
-	// On home: menu is open when NOT snapped. When snapped, only open if user toggled it open.
-	// On other pages: menu is closed by default unless user toggles it open.
-	const isMenuOpen = $derived(
-		isHome ? (!isSnapped ? true : userExpandedWhenSnapped) : userExpandedWhenSnapped
-	);
-
-	// Measure initial position and track scroll
+	// Measure initial position and track scroll for desktop snapping on home page
 	$effect(() => {
 		if (!isHome || typeof window === 'undefined') return;
+
+		let ticking = false;
 
 		const updateInitialTop = () => {
 			if (navElement) {
@@ -31,19 +27,17 @@
 		};
 
 		const handleScroll = () => {
-			if (!navElement) return;
-			// When scroll reaches or passes initial nav position, it is snapped at top
-			const snapped = window.scrollY >= (initialNavTop > 0 ? initialNavTop - 2 : 500);
-
-			if (snapped !== isSnapped) {
-				isSnapped = snapped;
-				if (!snapped) {
-					// Reset manual toggle when returning back to top
-					userExpandedWhenSnapped = false;
-				} else {
-					// Collapsed by default upon snapping
-					userExpandedWhenSnapped = false;
-				}
+			if (!ticking) {
+				window.requestAnimationFrame(() => {
+					if (navElement) {
+						const snapped = window.scrollY >= (initialNavTop > 0 ? initialNavTop - 2 : 500);
+						if (snapped !== isSnapped) {
+							isSnapped = snapped;
+						}
+					}
+					ticking = false;
+				});
+				ticking = true;
 			}
 		};
 
@@ -64,18 +58,18 @@
 	});
 
 	function toggleMenu() {
-		userExpandedWhenSnapped = !userExpandedWhenSnapped;
+		isMobileMenuOpen = !isMobileMenuOpen;
 	}
 
 	function closeMenu() {
-		userExpandedWhenSnapped = false;
+		isMobileMenuOpen = false;
 	}
 </script>
 
 <nav
 	bind:this={navElement}
 	aria-label="Main Navigation"
-	class="sticky top-0 z-40 w-full border-b border-border-main/60 bg-bg-main/90 backdrop-blur-md transition-all duration-200"
+	class="sticky top-0 z-40 w-full border-b border-border-main/60 bg-bg-main/90 backdrop-blur-md will-change-transform"
 >
 	<div
 		class="mx-auto flex max-w-6xl items-center px-6 py-3.5 {isHome
@@ -98,7 +92,7 @@
 			</a>
 		{/if}
 
-		<!-- Desktop Links -->
+		<!-- Desktop Links (Always visible on desktop md:flex) -->
 		<div class="hidden items-center gap-8 md:flex">
 			{#if !isHome}
 				<a
@@ -146,91 +140,95 @@
 			</a>
 		</div>
 
-		<!-- Mobile Button: On home, only shown when snapped to the top; on other pages always shown on mobile -->
-		{#if !isHome || isSnapped}
-			<button
-				type="button"
-				onclick={toggleMenu}
-				aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-				aria-expanded={isMenuOpen}
-				class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 text-text-main focus:outline-none hover:text-white md:hidden animate-fade-in"
-			>
-				{#if isMenuOpen}
-					<!-- Close 'X' Icon -->
-					<svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
-				{:else}
-					<!-- Hamburger Icon -->
-					<svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M4 6h16M4 12h16M4 18h16"
-						/>
-					</svg>
-				{/if}
-			</button>
-		{/if}
+		<!-- Mobile Button: Visible on mobile across all pages -->
+		<button
+			type="button"
+			onclick={toggleMenu}
+			aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+			aria-expanded={isMobileMenuOpen}
+			class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 text-text-main focus:outline-none hover:text-white md:hidden"
+		>
+			{#if isMobileMenuOpen}
+				<!-- Close 'X' Icon -->
+				<svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M6 18L18 6M6 6l12 12"
+					/>
+				</svg>
+			{:else}
+				<!-- Hamburger Icon -->
+				<svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M4 6h16M4 12h16M4 18h16"
+					/>
+				</svg>
+			{/if}
+		</button>
 	</div>
 
-	<!-- Mobile Links Menu Drawer -->
-	{#if isMenuOpen}
-		<div
-			class="animate-fade-in border-t border-border-main/50 bg-bg-main/95 px-6 py-4 md:hidden {isHome
-				? 'text-center'
-				: 'text-left'}"
-		>
-			<div class="flex flex-col gap-2">
-				{#if !isHome}
-					<a
-						href="/"
-						onclick={closeMenu}
-						aria-current={currentPath === '/' ? 'page' : undefined}
-						class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath === '/'
-							? 'font-semibold text-text-main'
-							: 'text-text-muted'}"
-					>
-						Home
-					</a>
-				{/if}
+	<!-- Mobile Links Menu Drawer with smooth max-height & opacity transition -->
+	<div
+		class="overflow-hidden border-border-main/50 bg-bg-main/95 transition-[max-height,opacity] duration-300 ease-in-out md:hidden {isHome
+			? 'text-center'
+			: 'text-left'} {isMobileMenuOpen
+			? 'max-h-80 border-t opacity-100'
+			: 'max-h-0 border-t-0 opacity-0 pointer-events-none'}"
+	>
+		<div class="flex flex-col gap-2 px-6 py-4">
+			{#if !isHome}
 				<a
-					href="/portfolio"
+					href="/"
 					onclick={closeMenu}
-					aria-current={currentPath.startsWith('/portfolio') ? 'page' : undefined}
-					class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath.startsWith('/portfolio')
+					aria-current={currentPath === '/' ? 'page' : undefined}
+					class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath === '/'
 						? 'font-semibold text-text-main'
 						: 'text-text-muted'}"
 				>
-					Portfolio
+					Home
 				</a>
-				<a
-					href="/about"
-					onclick={closeMenu}
-					aria-current={currentPath.startsWith('/about') ? 'page' : undefined}
-					class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath.startsWith('/about')
-						? 'font-semibold text-text-main'
-						: 'text-text-muted'}"
-				>
-					About
-				</a>
-				<a
-					href="/links"
-					onclick={closeMenu}
-					aria-current={currentPath.startsWith('/links') ? 'page' : undefined}
-					class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath.startsWith('/links')
-						? 'font-semibold text-text-main'
-						: 'text-text-muted'}"
-				>
-					Links
-				</a>
-			</div>
+			{/if}
+			<a
+				href="/portfolio"
+				onclick={closeMenu}
+				aria-current={currentPath.startsWith('/portfolio') ? 'page' : undefined}
+				class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath.startsWith(
+					'/portfolio'
+				)
+					? 'font-semibold text-text-main'
+					: 'text-text-muted'}"
+			>
+				Portfolio
+			</a>
+			<a
+				href="/about"
+				onclick={closeMenu}
+				aria-current={currentPath.startsWith('/about') ? 'page' : undefined}
+				class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath.startsWith(
+					'/about'
+				)
+					? 'font-semibold text-text-main'
+					: 'text-text-muted'}"
+			>
+				About
+			</a>
+			<a
+				href="/links"
+				onclick={closeMenu}
+				aria-current={currentPath.startsWith('/links') ? 'page' : undefined}
+				class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath.startsWith(
+					'/links'
+				)
+					? 'font-semibold text-text-main'
+					: 'text-text-muted'}"
+			>
+				Links
+			</a>
 		</div>
-	{/if}
+	</div>
 </nav>
