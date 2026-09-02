@@ -27,11 +27,11 @@
 	--color-border-accent: #2d5a43; /* Accent border (e.g. profile avatar ring) */
 
 	/* Typography & Text colors */
-	--color-text-main: #eff0e0; /* Primary off-white heading text */
-	--color-text-body: #d4dbd2; /* Readable off-white body text */
-	--color-text-highlight: #f5de33ef; /* Highlight text (e.g. nav links) */
-	--color-text-muted: #7d9183; /* Muted secondary text (e.g. copyright) */
-	--color-text-footer: #c5d0c1; /* Footer navigation links */
+	--color-text-main: #eff0e0; /* Primary off-white heading text (Contrast > 14:1) */
+	--color-text-body: #d4dbd2; /* Readable off-white body text (Contrast > 11:1) */
+	--color-text-highlight: #f5de33; /* Highlight text (Contrast > 12:1) */
+	--color-text-muted: #94a89a; /* Muted secondary text (Contrast > 6.0:1, exceeds WCAG AA) */
+	--color-text-footer: #d0ded4; /* Footer navigation links (Contrast > 11:1) */
 }
 
 body {
@@ -45,4 +45,23 @@ h4,
 .font-serif {
 	font-family: var(--font-serif);
 	letter-spacing: 0.05em;
+}
+
+/* Accessibility Focus States */
+:focus-visible {
+	outline: 2px solid var(--color-text-highlight);
+	outline-offset: 3px;
+	border-radius: 4px;
+}
+
+/* Reduced Motion preferences */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
 }

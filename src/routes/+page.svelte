@@ -85,7 +85,7 @@
 		</div>
 	</header>
 
-	<main class="flex w-full flex-col items-center pt-8">
+	<main id="main-content" class="flex w-full flex-col items-center pt-8">
 		<!-- Bio Section / Title Blurb -->
 		<div class="w-full max-w-4xl px-6 pb-6 text-center flex flex-col items-center">
 			<p class="mx-auto max-w-xl text-base leading-relaxed text-text-body sm:text-lg">

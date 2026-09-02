@@ -22,7 +22,7 @@
 	<div>
 		<Navbar isHome={false} />
 
-		<main class="mx-auto max-w-6xl px-6 py-12">
+		<main id="main-content" class="mx-auto max-w-6xl px-6 py-12">
 			<!-- Header -->
 			<div class="mb-12 text-center md:text-left">
 				<h1 class="font-serif text-3xl font-bold tracking-wide sm:text-4xl md:text-5xl">

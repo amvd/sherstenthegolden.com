@@ -12,7 +12,7 @@
 	<div>
 		<Navbar isHome={false} />
 
-		<main class="mx-auto max-w-6xl px-6 py-12">
+		<main id="main-content" class="mx-auto max-w-6xl px-6 py-12">
 			<!-- About Container: On mobile text at top fading to image at bottom; on desktop image left fading to bio on right -->
 			<div
 				class="relative overflow-hidden rounded-2xl border border-border-main/50 bg-bg-card/20 shadow-xl flex flex-col md:flex-row items-center"
