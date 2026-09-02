@@ -1,14 +1,11 @@
 <script lang="ts">
-	import profileImg from '$lib/assets/images/main.jpg?w=768;1280;1920&format=avif;webp;jpg&as=picture';
+	import Navbar from '$lib/components/Navbar.svelte';
+	import Footer from '$lib/components/Footer.svelte';
+	import profileImg from '$lib/assets/profile/main.jpg?w=768;1280;1920&format=avif;webp;jpg&as=picture';
 	import home1 from '$lib/assets/images/home/home-1.jpg?w=640;1024;1600&format=avif;webp;jpg&as=picture';
 	import home2 from '$lib/assets/images/home/home-2.jpg?w=640;1024;1600&format=avif;webp;jpg&as=picture';
 	import home3 from '$lib/assets/images/home/home-3.jpg?w=640;1024;1600&format=avif;webp;jpg&as=picture';
 	import home4 from '$lib/assets/images/home/home-4.jpg?w=640;1024;1600&format=avif;webp;jpg&as=picture';
-
-	const socials = [
-		{ name: 'Instagram', url: 'https://instagram.com/shersten.the.golden' },
-		{ name: 'Email', url: 'mailto:contact@sherstenthegolden.com' }
-	];
 
 	const showcases = [
 		{
@@ -88,21 +85,19 @@
 		</div>
 	</header>
 
-	<main class="flex w-full flex-col items-center pt-4">
-		<!-- Bio Section -->
-		<div class="w-full max-w-4xl px-6 text-center">
+	<main class="flex w-full flex-col items-center pt-8">
+		<!-- Bio Section / Title Blurb -->
+		<div class="w-full max-w-4xl px-6 pb-8 text-center">
 			<p class="mx-auto max-w-xl text-base leading-relaxed text-text-body sm:text-lg">
 				Fantasy cosplayer, prop maker, and themed model bringing legendary characters to life.
 			</p>
 		</div>
 
-		<!-- Divider -->
-		<div class="flex w-full max-w-4xl justify-center px-6">
-			<hr class="my-12 w-full max-w-xl border-border-main" />
-		</div>
+		<!-- Sticky Navbar (Center-aligned on Home, positioned after the title blurb and title image) -->
+		<Navbar isHome={true} />
 
 		<!-- Alternating Showcases with Seamless Full Edge-to-Edge Fading & Parallax -->
-		<section class="flex w-full flex-col gap-20 overflow-hidden md:gap-36">
+		<section class="flex w-full flex-col gap-20 overflow-hidden md:gap-36 pt-4">
 			{#each showcases as item, i}
 				{@const isEven = i % 2 === 0}
 				<!-- Expected scroll position for this section to calculate relative parallax offset -->
@@ -200,22 +195,5 @@
 	</main>
 
 	<!-- Footer -->
-	<footer class="mt-24 border-t border-border-main px-6 pt-8 pb-12 text-center">
-		<div class="flex flex-wrap justify-center gap-6 text-sm text-text-footer">
-			{#each socials as social}
-				<a
-					href={social.url}
-					target="_blank"
-					rel="noreferrer"
-					class="transition-colors hover:text-text-main"
-				>
-					{social.name}
-				</a>
-			{/each}
-		</div>
-		<p class="mt-6 text-xs text-text-muted">
-			© {new Date().getFullYear()} Shersten the Golden, built with love by
-			<a href="https://armand.io" target="_blank" class="underline">armand.io</a>.
-		</p>
-	</footer>
+	<Footer />
 </div>

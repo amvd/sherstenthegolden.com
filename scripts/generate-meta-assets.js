@@ -2,7 +2,9 @@ import sharp from 'sharp';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const sourceImage = path.resolve('src/lib/assets/images/main.jpg');
+const sourceImage = fs.existsSync(path.resolve('src/lib/assets/profile/main.jpg'))
+	? path.resolve('src/lib/assets/profile/main.jpg')
+	: path.resolve('src/lib/assets/images/main.jpg');
 const staticDir = path.resolve('static');
 
 async function generateMetaAssets() {
