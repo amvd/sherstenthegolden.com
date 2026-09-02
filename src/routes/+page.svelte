@@ -41,6 +41,53 @@
 
 	let scrollY = $state(0);
 	let innerHeight = $state(800);
+
+	/**
+	 * Parallax Svelte Action:
+	 * Begins with the photo aligned to the top (0px) when the viewer reaches it,
+	 * and translates the image downward (+maxTravelY px) and subtly inward (+maxTravelX px) as the user scrolls.
+	 */
+	function showcaseParallax(
+		node: HTMLElement,
+		options: { mobile?: number; desktop?: number; horizontal?: number } = {
+			mobile: 140,
+			desktop: 240,
+			horizontal: 20
+		}
+	) {
+		function update() {
+			const frame = node.parentElement;
+			if (!frame) return;
+			const rect = frame.getBoundingClientRect();
+			const vHeight = window.innerHeight;
+			const isDesktop = window.innerWidth >= 768;
+			const maxTravelY = isDesktop ? (options.desktop ?? 240) : (options.mobile ?? 140);
+			const baseTravelX = options.horizontal ?? 20;
+			const maxTravelX = isDesktop ? baseTravelX : baseTravelX * 0.4;
+			// Total travel distance from when top of frame enters bottom of screen to when bottom leaves top
+			const totalDistance = vHeight + rect.height;
+			// How far the frame has traveled through the screen
+			const travel = vHeight - rect.top;
+			// Clamped progress from 0 (just entering bottom) to 1 (leaving top)
+			const progress = Math.max(0, Math.min(1, travel / totalDistance));
+			// Translates downward and subtly horizontally
+			const translateY = progress * maxTravelY;
+			const translateX = progress * maxTravelX;
+			node.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
+		}
+
+		window.addEventListener('scroll', update, { passive: true });
+		window.addEventListener('resize', update, { passive: true });
+		// Initial update once mounted
+		update();
+
+		return {
+			destroy() {
+				window.removeEventListener('scroll', update);
+				window.removeEventListener('resize', update);
+			}
+		};
+	}
 </script>
 
 <svelte:window bind:scrollY bind:innerHeight />
@@ -63,8 +110,10 @@
 <div class="flex min-h-screen flex-col justify-between bg-bg-main text-text-main">
 	<!-- Full-width Hero Banner with Parallax -->
 	<header class="relative h-[70vh] w-full overflow-hidden sm:h-[80vh]">
-		<!-- Parallax Image Layer -->
-		<picture class="absolute inset-0 h-full w-full">
+		<!-- Parallax Image Layer with Top Buffer and early bottom fade to prevent edge exposure on scroll -->
+		<picture
+			class="absolute -top-[15%] inset-x-0 h-[135%] w-full [mask-image:linear-gradient(to_bottom,_black_30%,_transparent_72%)] [-webkit-mask-image:linear-gradient(to_bottom,_black_30%,_transparent_72%)]"
+		>
 			{#each Object.entries(profileImg.sources) as [format, srcset]}
 				<source {srcset} type={'image/' + format} />
 			{/each}
@@ -73,15 +122,18 @@
 				width={profileImg.img.w}
 				height={profileImg.img.h}
 				alt="Shersten the Golden"
-				class="h-[120%] w-full object-cover object-center will-change-transform"
-				style:transform="translateY({scrollY * 0.35}px)"
+				class="h-full w-full object-cover object-center will-change-transform"
+				style:transform="translateY({scrollY * 0.25}px)"
 				loading="eager"
 				decoding="async"
 			/>
 		</picture>
 
 		<!-- Gradient Vignette / Overlay to blend into page background and ensure high text readability -->
-		<div class="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-bg-main"></div>
+		<div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-bg-main"></div>
+		<div
+			class="pointer-events-none absolute inset-x-0 bottom-0 h-52 bg-gradient-to-t from-bg-main from-25% via-bg-main/90 to-transparent"
+		></div>
 
 		<!-- Title Floating on Top of Image Near Bottom -->
 		<div class="absolute inset-x-0 bottom-0 z-10 mx-auto max-w-4xl px-6 pb-8 text-center sm:pb-12">
@@ -121,7 +173,7 @@
 			</a>
 		</div>
 
-		<!-- Static Mobile In-Page Links (Rendered in normal document flow on mobile so there are zero sticky layout shifts) -->
+		<!-- Static Mobile In-Page Links (Rendered in normal document flow on mobile) -->
 		<div class="flex flex-col items-center gap-3 py-4 text-center md:hidden">
 			<a
 				href="/portfolio"
@@ -143,74 +195,76 @@
 			</a>
 		</div>
 
-		<!-- Sticky Navbar (Positioned in normal flow on desktop, sticks on scroll with smooth sticky hamburger on mobile) -->
+		<!-- Sentinel element to detect when in-page links have completely scrolled past top of viewport -->
+		<div id="home-nav-sentinel" class="h-0 w-full md:hidden"></div>
+
+		<!-- Sticky Navbar -->
 		<Navbar isHome={true} />
 
 		<!-- Alternating Showcases with Seamless Full Edge-to-Edge Fading & Parallax -->
 		<section class="flex w-full flex-col gap-20 overflow-hidden pt-4 md:gap-36">
 			{#each showcases as item, i}
 				{@const isEven = i % 2 === 0}
-				<!-- Expected scroll position for this section to calculate relative parallax offset -->
-				{@const baseOffset = 600 + i * 800}
-				{@const parallaxY = (scrollY - baseOffset) * 0.08}
-
 				<div
 					class="relative flex w-full flex-col items-center md:flex-row {isEven
 						? 'md:flex-row'
 						: 'md:flex-row-reverse'}"
 				>
-					<!-- Full-Height Image Container with Smooth Multi-Stop Gradient Fades -->
-					<div class="relative w-full overflow-hidden md:w-3/5">
-						<picture class="block w-full">
-							{#each Object.entries(item.picture.sources) as [format, srcset]}
-								<source {srcset} type={'image/' + format} />
-							{/each}
-							<img
-								src={item.picture.img.src}
-								width={item.picture.img.w}
-								height={item.picture.img.h}
-								alt={item.alt}
-								class="h-auto w-full scale-105 object-contain will-change-transform"
-								style:transform="translateY({parallaxY}px)"
-								loading="lazy"
-								decoding="async"
-							/>
-						</picture>
-
-						<!-- Mobile: Smooth Vignette Gradient (Top, Bottom & Sides) -->
+					<!-- Full-Height Image Container: Outer Frame with Bottom Boundary Fade Mask -->
+					<div
+						class="relative w-full overflow-hidden md:w-3/5 [mask-image:linear-gradient(to_bottom,_black_0%,_black_72%,_transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,_black_0%,_black_72%,_transparent_100%)]"
+					>
+						<!-- Inner Parallax Layer: Top is feathered so moving down leaves a soft top, and bottom is feathered by outer mask -->
 						<div
-							class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_40%,_var(--color-bg-main)_95%)] md:hidden"
+							use:showcaseParallax={{
+								mobile: 140,
+								desktop: 240,
+								horizontal: isEven ? 24 : -24
+							}}
+							class="relative top-0 w-full scale-105 will-change-transform [mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_100%)] [-webkit-mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_100%)]"
+						>
+							<picture class="block w-full">
+								{#each Object.entries(item.picture.sources) as [format, srcset]}
+									<source {srcset} type={'image/' + format} />
+								{/each}
+								<img
+									src={item.picture.img.src}
+									width={item.picture.img.w}
+									height={item.picture.img.h}
+									alt={item.alt}
+									class="h-auto w-full object-contain"
+									loading="lazy"
+									decoding="async"
+								/>
+							</picture>
+						</div>
+
+						<!-- Outer Fixed Top & Bottom Smooth Gradient Blends -->
+						<div
+							class="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-bg-main via-bg-main/80 to-transparent md:h-28"
 						></div>
 						<div
-							class="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg-main via-transparent to-bg-main md:hidden"
+							class="pointer-events-none absolute inset-x-0 -bottom-2 h-36 bg-gradient-to-t from-bg-main from-30% via-bg-main/90 to-transparent md:h-52"
 						></div>
 
-						<!-- Desktop: Deep Directional Gradient Mask from image edge into page background -->
+						<!-- Desktop: Fade ONLY the side facing the opposing text -->
 						{#if isEven}
+							<!-- Image is on Left, Text is on Right -> Fade Right Side only toward text -->
 							<div
-								class="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-transparent via-bg-main/30 to-bg-main md:block"
+								class="pointer-events-none absolute inset-y-0 right-0 hidden w-32 bg-gradient-to-l from-bg-main via-bg-main/80 to-transparent md:block"
 							></div>
-							<!-- Left edge gentle blend -->
 							<div
-								class="pointer-events-none absolute inset-y-0 left-0 hidden w-24 bg-gradient-to-r from-bg-main to-transparent md:block"
+								class="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-transparent via-bg-main/20 to-bg-main md:block"
 							></div>
 						{:else}
+							<!-- Image is on Right, Text is on Left -> Fade Left Side only toward text -->
 							<div
-								class="pointer-events-none absolute inset-0 hidden bg-gradient-to-l from-transparent via-bg-main/30 to-bg-main md:block"
+								class="pointer-events-none absolute inset-y-0 left-0 hidden w-32 bg-gradient-to-r from-bg-main via-bg-main/80 to-transparent md:block"
 							></div>
-							<!-- Right edge gentle blend -->
 							<div
-								class="pointer-events-none absolute inset-y-0 right-0 hidden w-24 bg-gradient-to-l from-bg-main to-transparent md:block"
+								class="pointer-events-none absolute inset-0 hidden bg-gradient-to-l from-transparent via-bg-main/20 to-bg-main md:block"
 							></div>
 						{/if}
-
-						<!-- Deep Top & Bottom Smooth Gradient Blends -->
-						<div
-							class="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-bg-main via-bg-main/60 to-transparent md:h-44"
-						></div>
-						<div
-							class="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-bg-main via-bg-main/60 to-transparent md:h-44"
-						></div>
 					</div>
 
 					<!-- Opposing Text Content Area -->

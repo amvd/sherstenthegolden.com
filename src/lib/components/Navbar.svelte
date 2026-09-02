@@ -24,7 +24,11 @@
 		let ticking = false;
 
 		const updateInitialTop = () => {
-			if (navElement) {
+			const sentinel = document.getElementById('home-nav-sentinel');
+			if (sentinel) {
+				const rect = sentinel.getBoundingClientRect();
+				initialNavTop = rect.top + window.scrollY;
+			} else if (navElement) {
 				const rect = navElement.getBoundingClientRect();
 				initialNavTop = rect.top + window.scrollY;
 			}
@@ -33,13 +37,12 @@
 		const handleScroll = () => {
 			if (!ticking) {
 				window.requestAnimationFrame(() => {
-					if (navElement) {
-						const snapped = window.scrollY >= (initialNavTop > 0 ? initialNavTop - 2 : 500);
-						if (snapped !== isSnapped) {
-							isSnapped = snapped;
-							if (!snapped) {
-								isMobileDrawerOpen = false;
-							}
+					// Snap when scrolled past the sentinel (bottom of the vertical in-page links)
+					const snapped = window.scrollY >= (initialNavTop > 0 ? initialNavTop : 600);
+					if (snapped !== isSnapped) {
+						isSnapped = snapped;
+						if (!snapped) {
+							isMobileDrawerOpen = false;
 						}
 					}
 					ticking = false;
@@ -76,10 +79,11 @@
 <nav
 	bind:this={navElement}
 	aria-label="Main Navigation"
-	class="sticky top-0 z-40 w-full border-border-main/60 bg-bg-main/90 backdrop-blur-md will-change-transform {isHome &&
-	!isSnapped
-		? 'hidden border-b-0 md:block md:border-b'
-		: 'border-b'}"
+	class="z-40 w-full bg-bg-main/90 backdrop-blur-md will-change-transform {isHome
+		? isSnapped
+			? 'fixed top-0 left-0 border-b border-border-main/60 md:sticky'
+			: 'hidden border-b-0 md:sticky md:top-0 md:block md:border-b md:border-border-main/60'
+		: 'sticky top-0 border-b border-border-main/60'}"
 >
 	<div
 		class="mx-auto flex max-w-6xl items-center px-6 py-3.5 {isHome

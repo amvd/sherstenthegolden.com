@@ -68,16 +68,6 @@
 							decoding="async"
 						/>
 					</picture>
-
-					<!-- Mobile Fade: Top gradient fade into text above -->
-					<div
-						class="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-bg-main via-bg-main/60 to-transparent md:hidden"
-					></div>
-
-					<!-- Desktop Fade: Left-to-right gradient fade from image to bio on the right -->
-					<div
-						class="pointer-events-none absolute inset-0 hidden bg-gradient-to-r from-transparent via-bg-main/40 to-bg-main md:block"
-					></div>
 				</div>
 			</div>
 		</main>
