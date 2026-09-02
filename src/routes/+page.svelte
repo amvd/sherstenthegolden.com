@@ -300,27 +300,30 @@
 			</a>
 		</div>
 
-		<!-- Static Mobile In-Page Links (Rendered in normal document flow on mobile) -->
-		<div class="flex flex-col items-center gap-3 py-4 text-center md:hidden">
+		<!-- Static Mobile In-Page Navigation Buttons (Rendered in normal document flow on mobile) -->
+		<nav
+			aria-label="Mobile in-page navigation"
+			class="flex w-full max-w-xs flex-col items-stretch gap-2.5 px-6 py-4 text-center md:hidden"
+		>
 			<a
 				href="/portfolio"
-				class="font-serif text-sm uppercase tracking-widest text-text-main transition-colors hover:text-text-highlight"
+				class="group flex min-h-[44px] items-center justify-center rounded-xl border border-border-main/70 bg-bg-card/40 px-6 py-2.5 font-serif text-sm font-semibold uppercase tracking-widest text-text-main shadow-sm transition-all duration-200 hover:border-border-accent hover:bg-bg-card/80 hover:text-text-highlight active:scale-[0.98]"
 			>
 				Portfolio
 			</a>
 			<a
 				href="/about"
-				class="font-serif text-sm uppercase tracking-widest text-text-main transition-colors hover:text-text-highlight"
+				class="group flex min-h-[44px] items-center justify-center rounded-xl border border-border-main/70 bg-bg-card/40 px-6 py-2.5 font-serif text-sm font-semibold uppercase tracking-widest text-text-main shadow-sm transition-all duration-200 hover:border-border-accent hover:bg-bg-card/80 hover:text-text-highlight active:scale-[0.98]"
 			>
 				About
 			</a>
 			<a
 				href="/links"
-				class="font-serif text-sm uppercase tracking-widest text-text-main transition-colors hover:text-text-highlight"
+				class="group flex min-h-[44px] items-center justify-center rounded-xl border border-border-main/70 bg-bg-card/40 px-6 py-2.5 font-serif text-sm font-semibold uppercase tracking-widest text-text-main shadow-sm transition-all duration-200 hover:border-border-accent hover:bg-bg-card/80 hover:text-text-highlight active:scale-[0.98]"
 			>
 				Links
 			</a>
-		</div>
+		</nav>
 
 		<!-- Sentinel element to detect when in-page links have completely scrolled past top of viewport -->
 		<div id="home-nav-sentinel" class="h-0 w-full md:hidden"></div>
