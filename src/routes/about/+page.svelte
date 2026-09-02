@@ -15,30 +15,28 @@
 		<main id="main-content" class="mx-auto max-w-6xl px-6 py-12">
 			<!-- About Container: On mobile text at top fading to image at bottom; on desktop image left fading to bio on right -->
 			<div
-				class="relative overflow-hidden rounded-2xl border border-border-main/50 bg-bg-card/20 shadow-xl flex flex-col md:flex-row items-center"
+				class="relative flex flex-col items-center overflow-hidden rounded-2xl border border-border-main/50 bg-bg-card/20 shadow-xl md:flex-row"
 			>
 				<!-- Mobile: Bio Text at Top | Desktop: Bio Text on Right -->
 				<!-- Note: On desktop flex-row-reverse puts bio on right, image on left -->
 				<div
 					class="order-1 flex w-full flex-col justify-center px-6 py-8 md:order-2 md:w-1/2 md:p-12"
 				>
-					<span
-						class="inline-block font-serif text-xs tracking-widest text-text-muted uppercase"
-					>
+					<span class="inline-block font-serif text-xs tracking-widest text-text-muted uppercase">
 						Cosplayer & Artisan
 					</span>
 					<h1 class="mt-2 font-serif text-3xl font-bold tracking-wide sm:text-4xl">
 						About Shersten
 					</h1>
 					<div class="mt-6 space-y-4 text-base leading-relaxed text-text-body">
+						<p>Shersten is honestly just really hot and you should hire her to be hot for you.</p>
 						<p>
-							Shersten the Golden is a fantasy cosplayer, prop artisan, and model dedicated to bringing complex, legendary lore to life through detailed craftsmanship.
+							She's also very talented and can make really cool things and she has a lot of swords
+							that she could poke you with but chooses not to because she is also kind and gentle.
 						</p>
 						<p>
-							Specializing in hand-sculpted armor, ornate filigree detail, wet-formed leathercrafting, and custom textile work, every build blends high-fantasy aesthetics with immersive storytelling.
-						</p>
-						<p>
-							Based in the Pacific Northwest, Shersten collaborates with photographers, videographers, and creators across the fantasy community to create stunning visual narratives.
+							Based in Colorado, Shersten is honestly just the best human being out there. She's
+							better than you, she's better than me, and also she does hair.
 						</p>
 					</div>
 				</div>

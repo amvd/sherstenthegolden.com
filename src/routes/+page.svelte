@@ -10,35 +10,32 @@
 	const showcases = [
 		{
 			picture: home1,
-			alt: 'Shersten the Golden Cosplay - Aurelia',
-			title: 'Aurelia, Blade of Dawn',
+			alt: 'Shersten the Cutie',
+			title: 'Shersten the Cutie',
 			subtitle: 'Armor Craft & Prop Design',
-			description:
-				'Hand-sculpted ornate filigree armor and radiant sun runes, tailored for high-fantasy storytelling.'
+			description: 'Hello I am really cute and pretty like a flower and also I like flowers.'
 		},
 		{
 			picture: home2,
-			alt: 'Shersten the Golden Cosplay - Solaria',
-			title: 'High Priestess Solaria',
+			alt: 'Shersten the Mermaid',
+			title: 'Shersten the Mermaid',
 			subtitle: 'Fabric & Gold Embroidery',
 			description:
-				'Flowing ceremonial silk vestments and radiant temple adornments inspired by ancient celestial order.'
+				"I also like water and the ocean and I like to stand on the beach and close my eyes and pretend I'm a mermaid (except I don't pretend because I truly am a mermaid)."
 		},
 		{
 			picture: home3,
 			alt: 'Shersten the Golden Cosplay - Elowen',
-			title: 'Elowen of the Gilded Canopy',
+			title: 'Shersten the Pirate',
 			subtitle: 'Leathercraft & Archery',
-			description:
-				'Wet-formed vegetable-tanned leaf armor and gilded recurve bow crafted for deep forest sentinels.'
+			description: 'Hello I am a pirate yarrr behave yourself or else I might poke you.'
 		},
 		{
 			picture: home4,
-			alt: 'Shersten the Golden Cosplay - Vespera',
-			title: 'Vespera the Astral Sorceress',
+			alt: 'Shersten the Rebel',
+			title: 'Shersten the Rebel',
 			subtitle: 'Costume & Star Runes',
-			description:
-				'Midnight velvet cloak embroidered with celestial constellations and glowing armillary magic spheres.'
+			description: 'The Empire will pay for what it did to my planet. >:('
 		}
 	];
 
@@ -87,9 +84,9 @@
 
 	<main id="main-content" class="flex w-full flex-col items-center pt-8">
 		<!-- Bio Section / Title Blurb -->
-		<div class="w-full max-w-4xl px-6 pb-6 text-center flex flex-col items-center">
+		<div class="flex w-full max-w-4xl flex-col items-center px-6 pb-6 text-center">
 			<p class="mx-auto max-w-xl text-base leading-relaxed text-text-body sm:text-lg">
-				Fantasy cosplayer, prop maker, and themed model bringing legendary characters to life.
+				Fantasy cosplayer, overall cutie, and themed model bringing legendary characters to life.
 			</p>
 			<a
 				href="https://instagram.com/shersten.the.golden"
@@ -107,7 +104,9 @@
 						d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
 					/>
 				</svg>
-				<span class="font-fondamento text-sm tracking-wide text-text-highlight">@shersten.the.golden</span>
+				<span class="font-fondamento text-sm tracking-wide text-text-highlight"
+					>@shersten.the.golden</span
+				>
 			</a>
 		</div>
 
@@ -115,7 +114,7 @@
 		<Navbar isHome={true} />
 
 		<!-- Alternating Showcases with Seamless Full Edge-to-Edge Fading & Parallax -->
-		<section class="flex w-full flex-col gap-20 overflow-hidden md:gap-36 pt-4">
+		<section class="flex w-full flex-col gap-20 overflow-hidden pt-4 md:gap-36">
 			{#each showcases as item, i}
 				{@const isEven = i % 2 === 0}
 				<!-- Expected scroll position for this section to calculate relative parallax offset -->
