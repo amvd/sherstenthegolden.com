@@ -147,13 +147,14 @@
 				{/each}
 			</div>
 
-			<!-- Desktop Only: View on Mobile QR Code Section -->
-			<div
-				class="mt-10 hidden flex-col items-center justify-center rounded-2xl border border-border-main/60 bg-bg-card/30 p-6 text-center shadow-lg md:flex"
+			<!-- Desktop Only: View on Mobile Floating QR Code Widget (Bottom Right) -->
+			<aside
+				aria-label="View on Mobile QR Code"
+				class="fixed right-8 bottom-8 z-30 hidden flex-col items-center justify-center rounded-2xl border border-border-main/80 bg-bg-main/90 p-4 text-center shadow-2xl backdrop-blur-md transition-all duration-300 hover:border-border-accent hover:shadow-[0_0_25px_rgba(45,90,67,0.4)] md:flex"
 			>
-				<div class="flex items-center gap-2 text-text-highlight">
+				<div class="flex items-center gap-1.5 text-text-highlight">
 					<svg
-						class="h-5 w-5"
+						class="h-4 w-4"
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"
@@ -166,15 +167,13 @@
 							d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
 						/>
 					</svg>
-					<span class="font-serif text-sm font-semibold tracking-wider uppercase">
+					<span class="font-serif text-xs font-semibold tracking-wider uppercase">
 						View on Mobile
 					</span>
 				</div>
-				<p class="mt-1.5 max-w-xs text-xs text-text-muted">
-					Scan with your phone's camera to open these links directly on mobile.
-				</p>
+				<p class="mt-1 text-[11px] text-text-muted">Scan to open on phone</p>
 				<div
-					class="mt-4 flex h-36 w-36 items-center justify-center rounded-xl bg-text-main p-2 shadow-inner"
+					class="mt-2.5 flex h-28 w-28 items-center justify-center rounded-lg bg-text-main p-1.5 shadow-inner"
 				>
 					{#if qrSvg}
 						<div class="h-full w-full [&>svg]:h-full [&>svg]:w-full" aria-hidden="true">
@@ -185,7 +184,7 @@
 						<div class="h-full w-full animate-pulse rounded bg-black/10"></div>
 					{/if}
 				</div>
-			</div>
+			</aside>
 		</main>
 	</div>
 
