@@ -189,10 +189,8 @@
 <div class="flex min-h-screen flex-col justify-between bg-bg-main text-text-main">
 	<!-- Full-width Hero Banner with Parallax (Using svh to prevent mobile URL-bar scroll jumping) -->
 	<header class="relative h-[70svh] w-full overflow-hidden bg-bg-main sm:h-[80svh]">
-		<!-- Parallax Image Layer with Top Buffer and early bottom fade to prevent edge exposure on scroll -->
-		<picture
-			class="absolute -top-[15%] inset-x-0 h-[135%] w-full overflow-hidden [mask-image:linear-gradient(to_bottom,_black_30%,_transparent_72%)] [-webkit-mask-image:linear-gradient(to_bottom,_black_30%,_transparent_72%)]"
-		>
+		<!-- Parallax Image Layer: Contained within header boundaries (no oversized picture container) -->
+		<picture class="absolute inset-0 h-full w-full overflow-hidden">
 			{#each Object.entries(profileImg.sources) as [format, srcset]}
 				<source {srcset} type={'image/' + format} />
 			{/each}
@@ -202,7 +200,7 @@
 				width={profileImg.img.w}
 				height={profileImg.img.h}
 				alt="Shersten the Golden"
-				class="h-full w-full object-cover object-center [backface-visibility:hidden]"
+				class="relative -top-[10%] h-[125%] w-full object-cover object-center [backface-visibility:hidden]"
 				loading="eager"
 				fetchpriority="high"
 				decoding="async"
@@ -212,7 +210,7 @@
 		<!-- Gradient Vignette / Overlay to blend into page background and ensure high text readability -->
 		<div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-bg-main"></div>
 		<div
-			class="pointer-events-none absolute inset-x-0 -bottom-1 h-56 bg-gradient-to-t from-bg-main from-30% via-bg-main/95 to-transparent"
+			class="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-bg-main from-20% via-bg-main/90 to-transparent"
 		></div>
 
 		<!-- Title Floating on Top of Image Near Bottom -->
