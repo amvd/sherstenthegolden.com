@@ -43,7 +43,7 @@
 	 * Continuous Batched RAF Parallax:
 	 * - Batches all layout reads (getBoundingClientRect) before applying GPU transforms.
 	 * - Zero layout thrashing / forced reflows.
-	 * - Completely eliminates IntersectionObserver async delay/snapping when scrolling stops.
+	 * - Centralized $effect manages scroll and resize listeners cleanly.
 	 */
 	type ParallaxEntry = {
 		node: HTMLElement;
@@ -72,19 +72,18 @@
 		const isDesktop = window.innerWidth >= 768;
 
 		// 1. Hero banner parallax (direct GPU transform)
-		// Clamped to >= 0 so rubber-band/overscroll bounce past top of page never translates image upwards
 		if (heroNode && currentScrollY < vHeight * 1.2) {
 			const clampedScrollY = Math.max(0, currentScrollY);
 			heroNode.style.transform = `translate3d(0, ${(clampedScrollY * 0.25).toFixed(1)}px, 0)`;
 		}
 
-		// 2. Read phase: Measure all frames while layout is clean
+		// 2. Read phase: Measure all active showcase frames in batch
 		const updates: { node: HTMLElement; transform: string }[] = [];
 
 		for (const entry of parallaxRegistry) {
 			const rect = entry.frame.getBoundingClientRect();
 
-			// Only calculate if within or near viewport (-150px buffer)
+			// Skip calculations if well outside the viewport
 			if (rect.bottom < -150 || rect.top > vHeight + 150) {
 				continue;
 			}
@@ -95,12 +94,9 @@
 			const maxTravelY = isDesktop ? entry.desktop : entry.mobile;
 			const maxTravelX = isDesktop ? entry.horizontal : entry.horizontal * 0.4;
 
-			const translateY = progress * maxTravelY;
-			const translateX = progress * maxTravelX;
-
 			updates.push({
 				node: entry.node,
-				transform: `translate3d(${translateX.toFixed(1)}px, ${translateY.toFixed(1)}px, 0)`
+				transform: `translate3d(${(progress * maxTravelX).toFixed(1)}px, ${(progress * maxTravelY).toFixed(1)}px, 0)`
 			});
 		}
 
@@ -130,19 +126,13 @@
 			return {};
 		}
 
-		const frame = node.parentElement ?? node;
 		const entry: ParallaxEntry = {
 			node,
-			frame,
+			frame: node.parentElement ?? node,
 			mobile: options.mobile ?? 140,
 			desktop: options.desktop ?? 240,
 			horizontal: options.horizontal ?? 20
 		};
-
-		if (parallaxRegistry.size === 0 && typeof window !== 'undefined') {
-			window.addEventListener('scroll', onGlobalScroll, { passive: true });
-			window.addEventListener('resize', onGlobalScroll, { passive: true });
-		}
 
 		parallaxRegistry.add(entry);
 		onGlobalScroll();
@@ -150,17 +140,27 @@
 		return {
 			destroy() {
 				parallaxRegistry.delete(entry);
-				if (parallaxRegistry.size === 0 && typeof window !== 'undefined') {
-					window.removeEventListener('scroll', onGlobalScroll);
-					window.removeEventListener('resize', onGlobalScroll);
-					if (globalRafId !== null) {
-						window.cancelAnimationFrame(globalRafId);
-						globalRafId = null;
-					}
-				}
 			}
 		};
 	}
+
+	$effect(() => {
+		if (typeof window === 'undefined') return;
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+		window.addEventListener('scroll', onGlobalScroll, { passive: true });
+		window.addEventListener('resize', onGlobalScroll, { passive: true });
+		onGlobalScroll();
+
+		return () => {
+			window.removeEventListener('scroll', onGlobalScroll);
+			window.removeEventListener('resize', onGlobalScroll);
+			if (globalRafId !== null) {
+				window.cancelAnimationFrame(globalRafId);
+				globalRafId = null;
+			}
+		};
+	});
 </script>
 
 <svelte:head>
@@ -291,10 +291,8 @@
 						? 'md:flex-row'
 						: 'md:flex-row-reverse'}"
 				>
-					<!-- Full-Height Image Container: Outer Frame with Bottom Boundary Fade Mask -->
-					<div
-						class="relative w-full overflow-hidden md:w-3/5 [mask-image:linear-gradient(to_bottom,_black_0%,_black_72%,_transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,_black_0%,_black_72%,_transparent_100%)]"
-					>
+					<!-- Full-Height Image Container -->
+					<div class="relative w-full overflow-hidden md:w-3/5">
 						<!-- Inner Parallax Layer: Top is feathered so moving down leaves a soft top, and bottom is feathered by outer mask -->
 						<div
 							use:showcaseParallax={{
