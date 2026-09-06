@@ -40,37 +40,21 @@
 	];
 
 	/**
-	 * High-Performance Zero-DOM-Recalc Parallax:
-	 * - Measures element geometry (offsetTop & offsetHeight) strictly on mount/resize.
-	 * - During scroll: Zero getBoundingClientRect() calls; calculates progress from cached values via single RAF dispatcher.
-	 * - Culls calculations completely when elements are offscreen via shared IntersectionObserver.
+	 * Continuous Batched RAF Parallax:
+	 * - Batches all layout reads (getBoundingClientRect) before applying GPU transforms.
+	 * - Zero layout thrashing / forced reflows.
+	 * - Completely eliminates IntersectionObserver async delay/snapping when scrolling stops.
 	 */
 	type ParallaxEntry = {
 		node: HTMLElement;
 		frame: HTMLElement;
-		top: number;
-		height: number;
-		isIntersecting: boolean;
 		mobile: number;
 		desktop: number;
 		horizontal: number;
 	};
 
 	const parallaxRegistry = new Set<ParallaxEntry>();
-	let sharedObserver: IntersectionObserver | null = null;
 	let globalRafId: number | null = null;
-	let lastScrollY = -1;
-
-	function measureAllParallax() {
-		if (typeof window === 'undefined') return;
-		for (const entry of parallaxRegistry) {
-			const rect = entry.frame.getBoundingClientRect();
-			entry.top = rect.top + window.scrollY;
-			entry.height = rect.height;
-		}
-		renderParallax();
-	}
-
 	let heroNode: HTMLElement | null = null;
 
 	function heroParallax(node: HTMLElement) {
@@ -87,72 +71,49 @@
 		const vHeight = window.innerHeight;
 		const isDesktop = window.innerWidth >= 768;
 
-		// Direct GPU transform for hero banner without triggering Svelte rune updates
+		// 1. Hero banner parallax (direct GPU transform)
 		if (heroNode && currentScrollY < vHeight * 1.2) {
 			heroNode.style.transform = `translate3d(0, ${currentScrollY * 0.25}px, 0)`;
 		}
 
+		// 2. Read phase: Measure all frames while layout is clean
+		const updates: { node: HTMLElement; transform: string }[] = [];
+
 		for (const entry of parallaxRegistry) {
-			if (!entry.isIntersecting) continue;
+			const rect = entry.frame.getBoundingClientRect();
+
+			// Only calculate if within or near viewport (-150px buffer)
+			if (rect.bottom < -150 || rect.top > vHeight + 150) {
+				continue;
+			}
+
+			const totalDistance = vHeight + rect.height;
+			const progress = Math.max(0, Math.min(1, (vHeight - rect.top) / totalDistance));
 
 			const maxTravelY = isDesktop ? entry.desktop : entry.mobile;
 			const maxTravelX = isDesktop ? entry.horizontal : entry.horizontal * 0.4;
 
-			const totalDistance = vHeight + entry.height;
-			// Relative distance from bottom of screen to top of element
-			const travel = currentScrollY + vHeight - entry.top;
-			const progress = Math.max(0, Math.min(1, travel / totalDistance));
-
 			const translateY = progress * maxTravelY;
 			const translateX = progress * maxTravelX;
-			entry.node.style.transform = `translate3d(${translateX}px, ${translateY}px, 0)`;
+
+			updates.push({
+				node: entry.node,
+				transform: `translate3d(${translateX.toFixed(1)}px, ${translateY.toFixed(1)}px, 0)`
+			});
 		}
+
+		// 3. Write phase: Apply GPU transforms in batch
+		for (let i = 0; i < updates.length; i++) {
+			updates[i].node.style.transform = updates[i].transform;
+		}
+
 		globalRafId = null;
-		lastScrollY = currentScrollY;
 	}
 
 	function onGlobalScroll() {
-		if (globalRafId === null) {
+		if (globalRafId === null && typeof window !== 'undefined') {
 			globalRafId = window.requestAnimationFrame(renderParallax);
 		}
-	}
-
-	function getSharedObserver(): IntersectionObserver | null {
-		if (typeof window === 'undefined') return null;
-
-		// Respect user accessibility preference: Disable parallax completely for reduced motion
-		const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-		if (prefersReducedMotion) return null;
-
-		if (!sharedObserver) {
-			sharedObserver = new IntersectionObserver(
-				(entries) => {
-					for (const obsEntry of entries) {
-						for (const item of parallaxRegistry) {
-							if (item.frame === obsEntry.target || item.node === obsEntry.target) {
-								item.isIntersecting = obsEntry.isIntersecting;
-								if (item.isIntersecting) {
-									onGlobalScroll();
-								}
-								break;
-							}
-						}
-					}
-				},
-				{ rootMargin: '150px 0px 150px 0px' }
-			);
-
-			window.addEventListener('scroll', onGlobalScroll, { passive: true });
-			window.addEventListener(
-				'resize',
-				() => {
-					measureAllParallax();
-					onGlobalScroll();
-				},
-				{ passive: true }
-			);
-		}
-		return sharedObserver;
 	}
 
 	function showcaseParallax(
@@ -171,39 +132,29 @@
 		const entry: ParallaxEntry = {
 			node,
 			frame,
-			top: 0,
-			height: 0,
-			isIntersecting: false,
 			mobile: options.mobile ?? 140,
 			desktop: options.desktop ?? 240,
 			horizontal: options.horizontal ?? 20
 		};
 
-		parallaxRegistry.add(entry);
-		const observer = getSharedObserver();
-		if (observer) {
-			observer.observe(frame);
+		if (parallaxRegistry.size === 0 && typeof window !== 'undefined') {
+			window.addEventListener('scroll', onGlobalScroll, { passive: true });
+			window.addEventListener('resize', onGlobalScroll, { passive: true });
 		}
 
-		// Initial measure
-		const timer = setTimeout(() => {
-			const rect = frame.getBoundingClientRect();
-			entry.top = rect.top + window.scrollY;
-			entry.height = rect.height;
-			onGlobalScroll();
-		}, 50);
+		parallaxRegistry.add(entry);
+		onGlobalScroll();
 
 		return {
 			destroy() {
-				clearTimeout(timer);
 				parallaxRegistry.delete(entry);
-				if (observer) {
-					observer.unobserve(frame);
-				}
-				if (parallaxRegistry.size === 0 && sharedObserver) {
-					sharedObserver.disconnect();
-					sharedObserver = null;
+				if (parallaxRegistry.size === 0 && typeof window !== 'undefined') {
 					window.removeEventListener('scroll', onGlobalScroll);
+					window.removeEventListener('resize', onGlobalScroll);
+					if (globalRafId !== null) {
+						window.cancelAnimationFrame(globalRafId);
+						globalRafId = null;
+					}
 				}
 			}
 		};
@@ -234,8 +185,8 @@
 </svelte:head>
 
 <div class="flex min-h-screen flex-col justify-between bg-bg-main text-text-main">
-	<!-- Full-width Hero Banner with Parallax (Using dvh for seamless mobile address bar transitions) -->
-	<header class="relative h-[70dvh] w-full overflow-hidden sm:h-[80dvh]">
+	<!-- Full-width Hero Banner with Parallax (Using svh to prevent mobile URL-bar scroll jumping) -->
+	<header class="relative h-[70svh] w-full overflow-hidden sm:h-[80svh]">
 		<!-- Parallax Image Layer with Top Buffer and early bottom fade to prevent edge exposure on scroll -->
 		<picture
 			class="absolute -top-[15%] inset-x-0 h-[135%] w-full [mask-image:linear-gradient(to_bottom,_black_30%,_transparent_72%)] [-webkit-mask-image:linear-gradient(to_bottom,_black_30%,_transparent_72%)]"
