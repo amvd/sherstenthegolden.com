@@ -55,7 +55,7 @@
 				<!-- Mobile: Image at Bottom | Desktop: Image on Left -->
 				<div class="relative order-2 w-full overflow-hidden md:order-1 md:w-1/2">
 					<picture class="block w-full">
-						{#each Object.entries(aboutImg.sources) as [format, srcset]}
+						{#each Object.entries(aboutImg.sources) as [format, srcset] (format)}
 							<source {srcset} type={'image/' + format} sizes="(min-width: 768px) 50vw, 100vw" />
 						{/each}
 						<img

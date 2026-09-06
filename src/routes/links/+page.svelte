@@ -79,7 +79,7 @@
 					style="width: 80px; height: 80px; border-radius: 9999px;"
 				>
 					<picture class="block h-full w-full" style="width: 100%; height: 100%;">
-						{#each Object.entries(avatarImg.sources) as [format, srcset]}
+						{#each Object.entries(avatarImg.sources) as [format, srcset] (format)}
 							<source {srcset} type={'image/' + format} />
 						{/each}
 						<img
@@ -104,7 +104,7 @@
 
 			<!-- Links Tree List -->
 			<div class="mt-8 flex flex-col gap-4">
-				{#each links as link}
+				{#each links as link (link.title)}
 					<a
 						href={link.url}
 						target={link.isExternal ? '_blank' : undefined}

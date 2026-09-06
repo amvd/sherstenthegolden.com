@@ -60,7 +60,9 @@ async function generateMetaAssets() {
 		.png()
 		.toFile(path.join(staticDir, 'icon-512.png'));
 
-	console.log('[meta-gen] Successfully generated favicons (including favicon.ico), apple-touch-icon, and og-image.jpg');
+	console.log(
+		'[meta-gen] Successfully generated favicons (including favicon.ico), apple-touch-icon, and og-image.jpg'
+	);
 }
 
 generateMetaAssets().catch((err) => {

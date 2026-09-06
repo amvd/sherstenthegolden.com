@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import { SvelteSet } from 'svelte/reactivity';
 	import profileImg from '$lib/assets/profile/main.jpg?w=768;1280;1920&format=avif;webp;jpg&as=picture';
 	import home1 from '$lib/assets/images/home/home-1.jpg?w=640;1024;1600&format=avif;webp;jpg&as=picture';
 	import home2 from '$lib/assets/images/home/home-2.jpg?w=640;1024;1600&format=avif;webp;jpg&as=picture';
@@ -53,7 +54,7 @@
 		horizontal: number;
 	};
 
-	const parallaxRegistry = new Set<ParallaxEntry>();
+	const parallaxRegistry = new SvelteSet<ParallaxEntry>();
 	let globalRafId: number | null = null;
 	let heroNode: HTMLElement | null = null;
 
@@ -122,7 +123,10 @@
 			horizontal: 20
 		}
 	) {
-		if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		if (
+			typeof window !== 'undefined' &&
+			window.matchMedia('(prefers-reduced-motion: reduce)').matches
+		) {
 			return {};
 		}
 
@@ -191,7 +195,7 @@
 	<header class="relative h-[70svh] w-full overflow-hidden bg-bg-main sm:h-[80svh]">
 		<!-- Parallax Image Layer: Contained within header boundaries -->
 		<picture class="absolute inset-0 h-full w-full overflow-hidden">
-			{#each Object.entries(profileImg.sources) as [format, srcset]}
+			{#each Object.entries(profileImg.sources) as [format, srcset] (format)}
 				<source {srcset} type={'image/' + format} />
 			{/each}
 			<img
@@ -200,7 +204,7 @@
 				width={profileImg.img.w}
 				height={profileImg.img.h}
 				alt="Shersten the Golden"
-				class="relative -top-[10%] h-[125%] w-full object-cover object-center [backface-visibility:hidden] [mask-image:linear-gradient(to_bottom,_black_0%,_black_50%,_transparent_85%)] [-webkit-mask-image:linear-gradient(to_bottom,_black_0%,_black_50%,_transparent_85%)]"
+				class="relative -top-[10%] h-[125%] w-full [mask-image:linear-gradient(to_bottom,_black_0%,_black_50%,_transparent_85%)] object-cover object-center [-webkit-mask-image:linear-gradient(to_bottom,_black_0%,_black_50%,_transparent_85%)] [backface-visibility:hidden]"
 				loading="eager"
 				fetchpriority="high"
 				decoding="async"
@@ -208,7 +212,9 @@
 		</picture>
 
 		<!-- Gradient Vignette / Overlay to blend into page background and ensure high text readability -->
-		<div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-bg-main"></div>
+		<div
+			class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-bg-main"
+		></div>
 		<div
 			class="pointer-events-none absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-bg-main from-20% via-bg-main/90 to-transparent"
 		></div>
@@ -258,19 +264,19 @@
 		>
 			<a
 				href="/portfolio"
-				class="group flex min-h-[44px] items-center justify-center rounded-xl border border-border-main/70 bg-bg-card/40 px-6 py-2.5 font-serif text-sm font-semibold uppercase tracking-widest text-text-main shadow-sm transition-all duration-200 hover:border-border-accent hover:bg-bg-card/80 hover:text-text-highlight active:scale-[0.98]"
+				class="group flex min-h-[44px] items-center justify-center rounded-xl border border-border-main/70 bg-bg-card/40 px-6 py-2.5 font-serif text-sm font-semibold tracking-widest text-text-main uppercase shadow-sm transition-all duration-200 hover:border-border-accent hover:bg-bg-card/80 hover:text-text-highlight active:scale-[0.98]"
 			>
 				Portfolio
 			</a>
 			<a
 				href="/about"
-				class="group flex min-h-[44px] items-center justify-center rounded-xl border border-border-main/70 bg-bg-card/40 px-6 py-2.5 font-serif text-sm font-semibold uppercase tracking-widest text-text-main shadow-sm transition-all duration-200 hover:border-border-accent hover:bg-bg-card/80 hover:text-text-highlight active:scale-[0.98]"
+				class="group flex min-h-[44px] items-center justify-center rounded-xl border border-border-main/70 bg-bg-card/40 px-6 py-2.5 font-serif text-sm font-semibold tracking-widest text-text-main uppercase shadow-sm transition-all duration-200 hover:border-border-accent hover:bg-bg-card/80 hover:text-text-highlight active:scale-[0.98]"
 			>
 				About
 			</a>
 			<a
 				href="/links"
-				class="group flex min-h-[44px] items-center justify-center rounded-xl border border-border-main/70 bg-bg-card/40 px-6 py-2.5 font-serif text-sm font-semibold uppercase tracking-widest text-text-main shadow-sm transition-all duration-200 hover:border-border-accent hover:bg-bg-card/80 hover:text-text-highlight active:scale-[0.98]"
+				class="group flex min-h-[44px] items-center justify-center rounded-xl border border-border-main/70 bg-bg-card/40 px-6 py-2.5 font-serif text-sm font-semibold tracking-widest text-text-main uppercase shadow-sm transition-all duration-200 hover:border-border-accent hover:bg-bg-card/80 hover:text-text-highlight active:scale-[0.98]"
 			>
 				Links
 			</a>
@@ -284,7 +290,7 @@
 
 		<!-- Alternating Showcases with Seamless Full Edge-to-Edge Fading & Parallax -->
 		<section class="flex w-full flex-col gap-20 overflow-hidden pt-4 md:gap-36">
-			{#each showcases as item, i}
+			{#each showcases as item, i (item.title)}
 				{@const isEven = i % 2 === 0}
 				<div
 					class="relative flex w-full flex-col items-center md:flex-row {isEven
@@ -300,11 +306,15 @@
 								desktop: 240,
 								horizontal: isEven ? 24 : -24
 							}}
-							class="relative top-0 w-full scale-105 will-change-transform [backface-visibility:hidden] [mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_82%,_transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_82%,_transparent_100%)]"
+							class="relative top-0 w-full scale-105 [mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_82%,_transparent_100%)] will-change-transform [-webkit-mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_82%,_transparent_100%)] [backface-visibility:hidden]"
 						>
 							<picture class="block w-full">
-								{#each Object.entries(item.picture.sources) as [format, srcset]}
-									<source {srcset} type={'image/' + format} sizes="(min-width: 768px) 60vw, 100vw" />
+								{#each Object.entries(item.picture.sources) as [format, srcset] (format)}
+									<source
+										{srcset}
+										type={'image/' + format}
+										sizes="(min-width: 768px) 60vw, 100vw"
+									/>
 								{/each}
 								<img
 									src={item.picture.img.src}

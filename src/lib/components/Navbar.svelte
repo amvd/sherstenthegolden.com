@@ -74,7 +74,8 @@
 				href="/"
 				onclick={closeDrawer}
 				aria-label="Shersten the Golden - Return to home"
-				class="font-serif text-lg font-bold tracking-wider text-text-main transition-colors hover:text-white {currentPath === '/links'
+				class="font-serif text-lg font-bold tracking-wider text-text-main transition-colors hover:text-white {currentPath ===
+				'/links'
 					? 'hidden md:block'
 					: 'block'}"
 			>
@@ -88,7 +89,7 @@
 				<a
 					href="/"
 					aria-current={currentPath === '/' ? 'page' : undefined}
-					class="font-serif text-sm uppercase tracking-widest transition-colors {currentPath === '/'
+					class="font-serif text-sm tracking-widest uppercase transition-colors {currentPath === '/'
 						? 'border-b border-text-main pb-0.5 font-semibold text-text-main'
 						: 'text-text-muted hover:text-text-main'}"
 				>
@@ -98,7 +99,7 @@
 			<a
 				href="/portfolio"
 				aria-current={currentPath.startsWith('/portfolio') ? 'page' : undefined}
-				class="font-serif text-sm uppercase tracking-widest transition-colors {currentPath.startsWith(
+				class="font-serif text-sm tracking-widest uppercase transition-colors {currentPath.startsWith(
 					'/portfolio'
 				)
 					? 'border-b border-text-main pb-0.5 font-semibold text-text-main'
@@ -109,7 +110,7 @@
 			<a
 				href="/about"
 				aria-current={currentPath.startsWith('/about') ? 'page' : undefined}
-				class="font-serif text-sm uppercase tracking-widest transition-colors {currentPath.startsWith(
+				class="font-serif text-sm tracking-widest uppercase transition-colors {currentPath.startsWith(
 					'/about'
 				)
 					? 'border-b border-text-main pb-0.5 font-semibold text-text-main'
@@ -120,7 +121,7 @@
 			<a
 				href="/links"
 				aria-current={currentPath.startsWith('/links') ? 'page' : undefined}
-				class="font-serif text-sm uppercase tracking-widest transition-colors {currentPath.startsWith(
+				class="font-serif text-sm tracking-widest uppercase transition-colors {currentPath.startsWith(
 					'/links'
 				)
 					? 'border-b border-text-main pb-0.5 font-semibold text-text-main'
@@ -137,11 +138,17 @@
 				onclick={toggleDrawer}
 				aria-label={isDrawerOpen ? 'Close navigation menu' : 'Open navigation menu'}
 				aria-expanded={isDrawerOpen}
-				class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 text-text-main focus:outline-none hover:text-white md:hidden"
+				class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-2 text-text-main hover:text-white focus:outline-none md:hidden"
 			>
 				{#if isDrawerOpen}
 					<!-- Close 'X' Icon -->
-					<svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg
+						class="h-6 w-6"
+						aria-hidden="true"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -151,7 +158,13 @@
 					</svg>
 				{:else}
 					<!-- Hamburger Icon -->
-					<svg class="h-6 w-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<svg
+						class="h-6 w-6"
+						aria-hidden="true"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -170,7 +183,7 @@
 			? 'text-center'
 			: 'text-left'} {isDrawerOpen
 			? 'max-h-80 border-t opacity-100'
-			: 'max-h-0 border-t-0 opacity-0 pointer-events-none'}"
+			: 'pointer-events-none max-h-0 border-t-0 opacity-0'}"
 	>
 		<div class="flex flex-col gap-2 px-6 py-4">
 			{#if !isHome}
@@ -178,7 +191,7 @@
 					href="/"
 					onclick={closeDrawer}
 					aria-current={currentPath === '/' ? 'page' : undefined}
-					class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath === '/'
+					class="inline-block py-2 font-serif text-sm tracking-widest uppercase {currentPath === '/'
 						? 'font-semibold text-text-main'
 						: 'text-text-muted'}"
 				>
@@ -189,7 +202,7 @@
 				href="/portfolio"
 				onclick={closeDrawer}
 				aria-current={currentPath.startsWith('/portfolio') ? 'page' : undefined}
-				class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath.startsWith(
+				class="inline-block py-2 font-serif text-sm tracking-widest uppercase {currentPath.startsWith(
 					'/portfolio'
 				)
 					? 'font-semibold text-text-main'
@@ -201,7 +214,7 @@
 				href="/about"
 				onclick={closeDrawer}
 				aria-current={currentPath.startsWith('/about') ? 'page' : undefined}
-				class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath.startsWith(
+				class="inline-block py-2 font-serif text-sm tracking-widest uppercase {currentPath.startsWith(
 					'/about'
 				)
 					? 'font-semibold text-text-main'
@@ -213,7 +226,7 @@
 				href="/links"
 				onclick={closeDrawer}
 				aria-current={currentPath.startsWith('/links') ? 'page' : undefined}
-				class="inline-block py-2 font-serif text-sm uppercase tracking-widest {currentPath.startsWith(
+				class="inline-block py-2 font-serif text-sm tracking-widest uppercase {currentPath.startsWith(
 					'/links'
 				)
 					? 'font-semibold text-text-main'

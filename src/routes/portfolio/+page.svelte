@@ -46,14 +46,18 @@
 
 			<!-- Portfolio Grid -->
 			<div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-2">
-				{#each items as item}
+				{#each items as item (item.title)}
 					<div
 						class="group overflow-hidden rounded-xl border border-border-main/60 bg-bg-card/40 transition-all hover:border-border-accent"
 					>
 						<div class="relative overflow-hidden">
 							<picture class="block w-full">
-								{#each Object.entries(item.picture.sources) as [format, srcset]}
-									<source {srcset} type={'image/' + format} sizes="(min-width: 640px) 50vw, 100vw" />
+								{#each Object.entries(item.picture.sources) as [format, srcset] (format)}
+									<source
+										{srcset}
+										type={'image/' + format}
+										sizes="(min-width: 640px) 50vw, 100vw"
+									/>
 								{/each}
 								<img
 									src={item.picture.img.src}
