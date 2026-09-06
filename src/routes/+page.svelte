@@ -189,7 +189,7 @@
 <div class="flex min-h-screen flex-col justify-between bg-bg-main text-text-main">
 	<!-- Full-width Hero Banner with Parallax (Using svh to prevent mobile URL-bar scroll jumping) -->
 	<header class="relative h-[70svh] w-full overflow-hidden bg-bg-main sm:h-[80svh]">
-		<!-- Parallax Image Layer: Contained within header boundaries (no oversized picture container) -->
+		<!-- Parallax Image Layer: Contained within header boundaries -->
 		<picture class="absolute inset-0 h-full w-full overflow-hidden">
 			{#each Object.entries(profileImg.sources) as [format, srcset]}
 				<source {srcset} type={'image/' + format} />
@@ -200,7 +200,7 @@
 				width={profileImg.img.w}
 				height={profileImg.img.h}
 				alt="Shersten the Golden"
-				class="relative -top-[10%] h-[125%] w-full object-cover object-center [backface-visibility:hidden]"
+				class="relative -top-[10%] h-[125%] w-full object-cover object-center [backface-visibility:hidden] [mask-image:linear-gradient(to_bottom,_black_0%,_black_50%,_transparent_85%)] [-webkit-mask-image:linear-gradient(to_bottom,_black_0%,_black_50%,_transparent_85%)]"
 				loading="eager"
 				fetchpriority="high"
 				decoding="async"
@@ -302,7 +302,7 @@
 								desktop: 240,
 								horizontal: isEven ? 24 : -24
 							}}
-							class="relative top-0 w-full scale-105 will-change-transform [backface-visibility:hidden] [mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_100%)] [-webkit-mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_100%)]"
+							class="relative top-0 w-full scale-105 will-change-transform [backface-visibility:hidden] [mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_82%,_transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_82%,_transparent_100%)]"
 						>
 							<picture class="block w-full">
 								{#each Object.entries(item.picture.sources) as [format, srcset]}
