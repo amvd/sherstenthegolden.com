@@ -69,7 +69,8 @@
 
 	function renderParallax() {
 		const currentScrollY = window.scrollY;
-		const vHeight = window.innerHeight;
+		const vHeight =
+			typeof document !== 'undefined' ? document.documentElement.clientHeight : window.innerHeight;
 		const isDesktop = window.innerWidth >= 768;
 
 		// 1. Hero banner parallax (direct GPU transform)
@@ -78,26 +79,33 @@
 			heroNode.style.transform = `translate3d(0, ${(clampedScrollY * 0.25).toFixed(1)}px, 0)`;
 		}
 
-		// 2. Read phase: Measure all active showcase frames in batch
+		// 2. Read phase: Measure active showcase frames in batch
 		const updates: { node: HTMLElement; transform: string }[] = [];
+		const screenCenterY = vHeight * 0.5;
 
 		for (const entry of parallaxRegistry) {
 			const rect = entry.frame.getBoundingClientRect();
 
 			// Skip calculations if well outside the viewport
-			if (rect.bottom < -150 || rect.top > vHeight + 150) {
+			if (rect.bottom < -100 || rect.top > vHeight + 100) {
 				continue;
 			}
 
-			const totalDistance = vHeight + rect.height;
-			const progress = Math.max(0, Math.min(1, (vHeight - rect.top) / totalDistance));
+			const frameCenterY = rect.top + rect.height * 0.5;
+			const halfRange = (vHeight + rect.height) * 0.5;
+			// Centered progress: -1 at top of screen, 0 at dead center, +1 at bottom of screen
+			const progress = Math.max(-1, Math.min(1, (frameCenterY - screenCenterY) / halfRange));
 
 			const maxTravelY = isDesktop ? entry.desktop : entry.mobile;
-			const maxTravelX = isDesktop ? entry.horizontal : entry.horizontal * 0.4;
+			const maxTravelX = isDesktop ? entry.horizontal : entry.horizontal * 0.5;
+
+			// Invert progress so items drift down as you scroll down
+			const translateY = -progress * maxTravelY;
+			const translateX = -progress * maxTravelX;
 
 			updates.push({
 				node: entry.node,
-				transform: `translate3d(${(progress * maxTravelX).toFixed(1)}px, ${(progress * maxTravelY).toFixed(1)}px, 0)`
+				transform: `translate3d(${translateX.toFixed(1)}px, ${translateY.toFixed(1)}px, 0)`
 			});
 		}
 
@@ -118,9 +126,9 @@
 	function showcaseParallax(
 		node: HTMLElement,
 		options: { mobile?: number; desktop?: number; horizontal?: number } = {
-			mobile: 140,
-			desktop: 240,
-			horizontal: 20
+			mobile: 35,
+			desktop: 70,
+			horizontal: 16
 		}
 	) {
 		if (
@@ -133,9 +141,9 @@
 		const entry: ParallaxEntry = {
 			node,
 			frame: node.parentElement ?? node,
-			mobile: options.mobile ?? 140,
-			desktop: options.desktop ?? 240,
-			horizontal: options.horizontal ?? 20
+			mobile: options.mobile ?? 35,
+			desktop: options.desktop ?? 70,
+			horizontal: options.horizontal ?? 16
 		};
 
 		parallaxRegistry.add(entry);
@@ -299,14 +307,14 @@
 				>
 					<!-- Full-Height Image Container -->
 					<div class="relative w-full overflow-hidden md:w-3/5">
-						<!-- Inner Parallax Layer: Top is feathered so moving down leaves a soft top, and bottom is feathered by outer mask -->
+						<!-- Inner Parallax Layer: Top & bottom are feathered smoothly with zero letterbox gap -->
 						<div
 							use:showcaseParallax={{
-								mobile: 140,
-								desktop: 240,
-								horizontal: isEven ? 24 : -24
+								mobile: 35,
+								desktop: 70,
+								horizontal: isEven ? 16 : -16
 							}}
-							class="relative top-0 w-full scale-105 [mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_82%,_transparent_100%)] will-change-transform [-webkit-mask-image:linear-gradient(to_bottom,_transparent_0%,_black_14%,_black_82%,_transparent_100%)] [backface-visibility:hidden]"
+							class="relative top-0 w-full overflow-hidden [mask-image:linear-gradient(to_bottom,_transparent_0%,_black_10%,_black_90%,_transparent_100%)] will-change-transform [-webkit-mask-image:linear-gradient(to_bottom,_transparent_0%,_black_10%,_black_90%,_transparent_100%)] [backface-visibility:hidden]"
 						>
 							<picture class="block w-full">
 								{#each Object.entries(item.picture.sources) as [format, srcset] (format)}
@@ -322,7 +330,7 @@
 									height={item.picture.img.h}
 									alt={item.alt}
 									sizes="(min-width: 768px) 60vw, 100vw"
-									class="h-auto w-full object-contain"
+									class="block h-auto w-full object-cover"
 									loading="lazy"
 									decoding="async"
 								/>
@@ -331,10 +339,10 @@
 
 						<!-- Outer Fixed Top & Bottom Smooth Gradient Blends -->
 						<div
-							class="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-bg-main via-bg-main/80 to-transparent md:h-28"
+							class="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-bg-main via-bg-main/80 to-transparent md:h-28"
 						></div>
 						<div
-							class="pointer-events-none absolute inset-x-0 -bottom-2 h-36 bg-gradient-to-t from-bg-main from-30% via-bg-main/90 to-transparent md:h-52"
+							class="pointer-events-none absolute inset-x-0 -bottom-1 h-44 bg-gradient-to-t from-bg-main from-25% via-bg-main/90 to-transparent md:h-52"
 						></div>
 
 						<!-- Desktop: Fade ONLY the side facing the opposing text -->
