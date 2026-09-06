@@ -72,8 +72,10 @@
 		const isDesktop = window.innerWidth >= 768;
 
 		// 1. Hero banner parallax (direct GPU transform)
+		// Clamped to >= 0 so rubber-band/overscroll bounce past top of page never translates image upwards
 		if (heroNode && currentScrollY < vHeight * 1.2) {
-			heroNode.style.transform = `translate3d(0, ${currentScrollY * 0.25}px, 0)`;
+			const clampedScrollY = Math.max(0, currentScrollY);
+			heroNode.style.transform = `translate3d(0, ${(clampedScrollY * 0.25).toFixed(1)}px, 0)`;
 		}
 
 		// 2. Read phase: Measure all frames while layout is clean
@@ -186,10 +188,10 @@
 
 <div class="flex min-h-screen flex-col justify-between bg-bg-main text-text-main">
 	<!-- Full-width Hero Banner with Parallax (Using svh to prevent mobile URL-bar scroll jumping) -->
-	<header class="relative h-[70svh] w-full overflow-hidden sm:h-[80svh]">
+	<header class="relative h-[70svh] w-full overflow-hidden bg-bg-main sm:h-[80svh]">
 		<!-- Parallax Image Layer with Top Buffer and early bottom fade to prevent edge exposure on scroll -->
 		<picture
-			class="absolute -top-[15%] inset-x-0 h-[135%] w-full [mask-image:linear-gradient(to_bottom,_black_30%,_transparent_72%)] [-webkit-mask-image:linear-gradient(to_bottom,_black_30%,_transparent_72%)]"
+			class="absolute -top-[15%] inset-x-0 h-[135%] w-full overflow-hidden [mask-image:linear-gradient(to_bottom,_black_30%,_transparent_72%)] [-webkit-mask-image:linear-gradient(to_bottom,_black_30%,_transparent_72%)]"
 		>
 			{#each Object.entries(profileImg.sources) as [format, srcset]}
 				<source {srcset} type={'image/' + format} />
@@ -208,9 +210,9 @@
 		</picture>
 
 		<!-- Gradient Vignette / Overlay to blend into page background and ensure high text readability -->
-		<div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-bg-main"></div>
+		<div class="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-bg-main"></div>
 		<div
-			class="pointer-events-none absolute inset-x-0 bottom-0 h-52 bg-gradient-to-t from-bg-main from-25% via-bg-main/90 to-transparent"
+			class="pointer-events-none absolute inset-x-0 -bottom-1 h-56 bg-gradient-to-t from-bg-main from-30% via-bg-main/95 to-transparent"
 		></div>
 
 		<!-- Title Floating on Top of Image Near Bottom -->
