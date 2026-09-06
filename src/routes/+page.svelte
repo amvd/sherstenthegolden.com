@@ -336,7 +336,7 @@
 			{#each showcases as item, i}
 				{@const isEven = i % 2 === 0}
 				<div
-					class="relative flex w-full flex-col items-center [content-visibility:auto] [contain-intrinsic-size:auto_700px] md:flex-row {isEven
+					class="relative flex w-full flex-col items-center md:flex-row {isEven
 						? 'md:flex-row'
 						: 'md:flex-row-reverse'}"
 				>
